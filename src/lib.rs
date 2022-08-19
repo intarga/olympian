@@ -1,4 +1,5 @@
 mod points;
+mod util;
 
 #[cfg(test)]
 mod tests {
