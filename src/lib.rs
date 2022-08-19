@@ -1,4 +1,4 @@
-mod points;
+pub mod points;
 mod util;
 
 #[cfg(test)]
