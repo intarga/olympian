@@ -1,6 +1,6 @@
 use rstar::{primitives::GeomWithData, RTree};
 
-enum CoordinateType {
+pub enum CoordinateType {
     Cartesian,
     Geodetic,
 }
@@ -51,7 +51,7 @@ impl Points {
                 .collect(),
         };
 
-        let mut tree = RTree::bulk_load(raw_points);
+        let tree = RTree::bulk_load(raw_points);
 
         Self {
             tree,
