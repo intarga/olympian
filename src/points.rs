@@ -1,3 +1,4 @@
+use crate::util;
 use rstar::{primitives::GeomWithData, RTree};
 
 pub enum CoordinateType {
@@ -25,7 +26,6 @@ impl Points {
         ctype: CoordinateType,
     ) -> Self {
         //TODO: ensure vecs are the same size
-        let radius_earth = 6371.0; //TODO define this somewhere more sensible?
 
         let raw_points: Vec<Point> = match ctype {
             CoordinateType::Cartesian => lats
@@ -41,9 +41,9 @@ impl Points {
                 .map(|(i, (lat, lon))| {
                     Point::new(
                         [
-                            (lat.to_radians().cos() * lon.to_radians().cos() * radius_earth),
-                            (lat.to_radians().cos() * lon.to_radians().sin() * radius_earth),
-                            (lat.to_radians().sin() * radius_earth),
+                            (lat.to_radians().cos() * lon.to_radians().cos() * util::RADIUS_EARTH),
+                            (lat.to_radians().cos() * lon.to_radians().sin() * util::RADIUS_EARTH),
+                            (lat.to_radians().sin() * util::RADIUS_EARTH),
                         ],
                         i,
                     )
