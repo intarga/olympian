@@ -63,3 +63,14 @@ impl Points {
         }
     }
 }
+
+pub fn convert_coordinates(lat: f32, lon: f32, ctype: CoordinateType) -> (f32, f32, f32) {
+    match ctype {
+        Cartesian => (lat, lon, 0.0),
+        Geodetic => (
+            lat.to_radians().cos() * lon.to_radians().cos() * util::RADIUS_EARTH,
+            lat.to_radians().cos() * lon.to_radians().sin() * util::RADIUS_EARTH,
+            lat.to_radians().sin() * util::RADIUS_EARTH,
+        ),
+    }
+}
