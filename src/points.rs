@@ -62,6 +62,25 @@ impl Points {
             ctype,
         }
     }
+
+    pub fn get_neighbours(
+        &self,
+        lat: f32,
+        lon: f32,
+        radius: f32,
+        include_match: bool,
+    ) -> Vec<&Point> {
+        let (x, y, z) = convert_coordinates(lat, lon, self.ctype);
+
+        let match_iter = self.tree.locate_within_distance([x, y, z], radius);
+
+        match include_match {
+            true => match_iter.collect(),
+            false => match_iter
+                .filter(|point| point.geom() != (&[x, y, z])) //TODO make sure this acts as expected
+                .collect(),
+        }
+    }
 }
 
 pub fn convert_coordinates(lat: f32, lon: f32, ctype: CoordinateType) -> (f32, f32, f32) {
