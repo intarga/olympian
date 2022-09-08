@@ -81,6 +81,10 @@ impl Points {
                 .collect(),
         }
     }
+
+    pub fn get_coords_at_index(&self, i: usize) -> (f32, f32, f32, f32) {
+        (self.lats[i], self.lons[i], self.elevs[i], self.lafs[i])
+    }
 }
 
 pub fn convert_coordinates(lat: f32, lon: f32, ctype: CoordinateType) -> (f32, f32, f32) {
