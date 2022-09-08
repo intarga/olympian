@@ -77,7 +77,7 @@ impl Points {
         match include_match {
             true => match_iter.collect(),
             false => match_iter
-                .filter(|point| point.geom() != (&[x, y, z])) //TODO make sure this acts as expected
+                .filter(|point| *point.geom() != [x, y, z])
                 .collect(),
         }
     }
