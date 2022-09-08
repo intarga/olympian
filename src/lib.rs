@@ -1,4 +1,5 @@
 pub mod points;
+pub mod qc_tests;
 mod util;
 
 #[cfg(test)]
