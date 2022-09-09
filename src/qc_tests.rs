@@ -101,3 +101,60 @@ pub fn buddy_check(
 
     Ok(flags)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const N: usize = 10;
+    const LATS: [f32; N] = [60.; N];
+    const LONS: [f32; N] = [
+        60.,
+        60.00011111,
+        60.00022222,
+        60.00033333,
+        60.00044444,
+        60.00055556,
+        60.00066667,
+        60.00077778,
+        60.00088889,
+        60.001,
+    ];
+    const ELEVS: [f32; N] = [0.; N];
+    const LAFS: [f32; N] = [0.; N];
+    const VALUES: [f32; N] = [0., 0., 0., 0., 0., 0., 0., 0., 0.1, 1.];
+    const RADII: [f32; 1] = [10000.];
+    const NUMS_MIN: [u32; 1] = [1];
+    const THRESHOLD: f32 = 1.;
+    const ELEV_GRADIENT: f32 = -0.0065;
+    const MAX_ELEV_DIFF: f32 = 200.;
+    const MIN_STD: f32 = 0.01;
+    const NUM_ITERATIONS: u32 = 2;
+    const OBS_TO_CHECK: [bool; N] = [true; N];
+
+    #[test]
+    fn test_buddy_check() {
+        assert_eq!(
+            buddy_check(
+                Points::from_latlons(
+                    LATS.to_vec(),
+                    LONS.to_vec(),
+                    ELEVS.to_vec(),
+                    LAFS.to_vec(),
+                    crate::points::CoordinateType::Cartesian
+                ),
+                VALUES.to_vec(),
+                RADII.to_vec(),
+                NUMS_MIN.to_vec(),
+                THRESHOLD,
+                MAX_ELEV_DIFF,
+                ELEV_GRADIENT,
+                MIN_STD,
+                NUM_ITERATIONS,
+                OBS_TO_CHECK.to_vec(),
+            )
+            .unwrap(),
+            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1]
+        )
+    }
+}
