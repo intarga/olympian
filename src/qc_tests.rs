@@ -1,5 +1,28 @@
 use crate::{points::Points, util};
 
+pub enum DipResult {
+    Pass,
+    Invalid,
+    Warn,
+    Fail,
+}
+
+pub fn dip_check(data: [f32; 3], high: f32, max: f32) -> DipResult {
+    if (data[2] < data[1] && data[0] < data[1]) || (data[2] > data[1] && data[0] > data[1]) {
+        let diffsum = ((data[2] - data[1]).abs() + (data[1] - data[0]).abs()).abs();
+        let diffdiff = ((data[2] - data[1]).abs() - (data[1] - data[0]).abs()).abs();
+
+        if diffsum > high && diffdiff < (diffsum * 35. / 100.) {
+            return DipResult::Warn;
+        }
+
+        if diffsum > max && diffdiff < (diffsum * 35. / 100.) {
+            return DipResult::Fail;
+        }
+    }
+    DipResult::Pass
+}
+
 pub fn buddy_check(
     tree_points: Points,
     values: Vec<f32>,
