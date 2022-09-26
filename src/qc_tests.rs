@@ -23,6 +23,16 @@ pub fn dip_check(data: [f32; 3], high: f32, max: f32) -> DipResult {
     DipResult::Pass
 }
 
+pub fn step_check(data: [f32; 2], high: f32, max: f32) -> DipResult {
+    if (data[0] - data[1]).abs() > high {
+        return DipResult::Warn;
+    }
+    if (data[0] - data[1]).abs() > max {
+        return DipResult::Fail;
+    }
+    DipResult::Pass
+}
+
 pub fn buddy_check(
     tree_points: Points,
     values: Vec<f32>,
