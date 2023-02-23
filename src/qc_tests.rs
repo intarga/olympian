@@ -33,6 +33,7 @@ pub fn step_check(data: [f32; 2], high: f32, max: f32) -> DipResult {
     DipResult::Pass
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn buddy_check(
     tree_points: Points,
     values: Vec<f32>,
