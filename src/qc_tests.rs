@@ -1,36 +1,38 @@
 use crate::{points::Points, util};
 
-pub enum DipResult {
+pub enum Flag {
     Pass,
-    Invalid,
-    Warn,
     Fail,
+    Warn,
+    Inconclusive,
+    Invalid,
+    DataMissing,
 }
 
-pub fn dip_check(data: [f32; 3], high: f32, max: f32) -> DipResult {
+pub fn dip_check(data: [f32; 3], high: f32, max: f32) -> Flag {
     if (data[2] < data[1] && data[0] < data[1]) || (data[2] > data[1] && data[0] > data[1]) {
         let diffsum = ((data[2] - data[1]).abs() + (data[1] - data[0]).abs()).abs();
         let diffdiff = ((data[2] - data[1]).abs() - (data[1] - data[0]).abs()).abs();
 
         if diffsum > high && diffdiff < (diffsum * 35. / 100.) {
-            return DipResult::Warn;
+            return Flag::Warn;
         }
 
         if diffsum > max && diffdiff < (diffsum * 35. / 100.) {
-            return DipResult::Fail;
+            return Flag::Fail;
         }
     }
-    DipResult::Pass
+    Flag::Pass
 }
 
-pub fn step_check(data: [f32; 2], high: f32, max: f32) -> DipResult {
+pub fn step_check(data: [f32; 2], high: f32, max: f32) -> Flag {
     if (data[0] - data[1]).abs() > high {
-        return DipResult::Warn;
+        return Flag::Warn;
     }
     if (data[0] - data[1]).abs() > max {
-        return DipResult::Fail;
+        return Flag::Fail;
     }
-    DipResult::Pass
+    Flag::Pass
 }
 
 #[allow(clippy::too_many_arguments)]
