@@ -26,6 +26,7 @@ impl Display for QcError {
 
 impl Error for QcError {}
 
+#[derive(Clone)]
 pub enum Flag {
     Pass,
     Fail,
@@ -165,9 +166,9 @@ pub fn buddy_check(
 }
 
 pub struct SctOutput {
-    flags: Vec<Flag>,
-    prob_gross_error: Vec<f32>,
-    rep: Vec<f32>,
+    pub flags: Vec<Flag>,
+    pub prob_gross_error: Vec<f32>,
+    pub rep: Vec<f32>,
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -277,7 +278,17 @@ pub fn sct(
         }
     }
 
-    todo!()
+    let mut flags = vec![Flag::Pass; vec_length];
+    let mut prob_gross_error = vec![0.; vec_length];
+    let mut rep = vec![0.; vec_length];
+
+    // TODO: the actual SCT
+
+    Ok(SctOutput {
+        flags,
+        prob_gross_error,
+        rep,
+    })
 }
 
 #[cfg(test)]
