@@ -138,6 +138,33 @@ pub fn buddy_check(
     Ok(flags)
 }
 
+pub struct SctOutput {
+    flags: Vec<Flag>,
+    prob_gross_error: Vec<f32>,
+    rep: Vec<f32>,
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn sct(
+    tree_points: &Points,
+    values: &Vec<f32>,
+    num_min: u32,
+    num_max: u32,
+    inner_radius: f32,
+    outer_radius: f32,
+    num_iterations: u32,
+    num_min_prof: u32,
+    min_elev_diff: f32,
+    min_horizontal_scale: f32,
+    vertical_scale: f32,
+    pos: &Vec<f32>,
+    neg: &Vec<f32>,
+    eps2: &Vec<f32>,
+    obs_to_check: &Vec<bool>,
+) -> Result<SctOutput, Box<dyn std::error::Error>> {
+    todo!()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
