@@ -282,6 +282,12 @@ pub fn sct(
     let mut prob_gross_error = vec![0.; vec_length];
     let mut rep = vec![0.; vec_length];
 
+    for i in 0..vec_length {
+        if !util::is_valid(tree_points.elevs[i]) {
+            flags[i] = Flag::Invalid;
+        }
+    }
+
     // TODO: the actual SCT
 
     Ok(SctOutput {

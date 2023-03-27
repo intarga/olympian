@@ -11,11 +11,11 @@ type Point = GeomWithData<[f32; 3], usize>;
 
 pub struct Points {
     pub tree: RTree<Point>,
-    lats: Vec<f32>,
-    lons: Vec<f32>,
-    elevs: Vec<f32>,
-    lafs: Vec<f32>,
-    ctype: CoordinateType,
+    pub lats: Vec<f32>,
+    pub lons: Vec<f32>,
+    pub elevs: Vec<f32>,
+    pub lafs: Vec<f32>,
+    pub ctype: CoordinateType,
 }
 
 impl Points {
