@@ -10,7 +10,7 @@ pub enum CoordinateType {
 type Point = GeomWithData<[f32; 3], usize>;
 
 pub struct Points {
-    tree: RTree<Point>,
+    pub tree: RTree<Point>,
     lats: Vec<f32>,
     lons: Vec<f32>,
     elevs: Vec<f32>,
