@@ -29,7 +29,7 @@ impl Display for QcError {
 
 impl Error for QcError {}
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum Flag {
     Pass,
     Fail,
@@ -37,6 +37,7 @@ pub enum Flag {
     Inconclusive,
     Invalid,
     DataMissing,
+    Isolated,
 }
 
 pub fn dip_check(data: [f32; 3], high: f32, max: f32) -> Flag {
@@ -178,8 +179,8 @@ pub struct SctOutput {
 pub fn sct(
     tree_points: &Points,
     values: &Vec<f32>,
-    num_min: u32,
-    num_max: u32,
+    num_min: usize,
+    num_max: usize,
     inner_radius: f32,
     outer_radius: f32,
     num_iterations: u32,
@@ -310,7 +311,61 @@ pub fn sct(
         }
     }
 
-    // TODO: the actual SCT
+    // would it make more sense for this to be a 1-based index?
+    for iteration in 0..num_iterations {
+        // resets each loop, for breaking if we don't throw anything new out
+        let mut num_thrown_out: u32 = 0;
+
+        // keep track of which observations have been checked
+        let mut checked = vec![false; vec_length];
+
+        let count_oi: u32 = 0;
+
+        for i in 0..vec_length {
+            if let Some(obs_to_check_inner) = obs_to_check {
+                if !obs_to_check_inner[i] {
+                    checked[i] = true;
+                    continue;
+                }
+            }
+
+            // continue if station is already flagged
+            if flags[i] != Flag::Pass {
+                checked[i] = true;
+                continue;
+            }
+            if checked[i] == true {
+                continue;
+            }
+
+            let (neighbours_unfiltered, distances_unfiltered) = tree_points
+                .get_neighbours_with_distance(
+                    tree_points.lats[i],
+                    tree_points.lons[i],
+                    outer_radius,
+                    true,
+                );
+            let (mut neighbours, mut distances) =
+                remove_flagged(neighbours_unfiltered, distances_unfiltered, &flags);
+
+            if neighbours.len() > num_max {
+                let mut pairs: Vec<(&Point, f32)> =
+                    neighbours.into_iter().zip(distances.into_iter()).collect();
+                pairs.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+
+                (neighbours, distances) = pairs.into_iter().take(num_max).unzip()
+            }
+            if neighbours.len() < num_min {
+                checked[i] = true;
+                flags[i] = Flag::Isolated;
+                continue;
+            }
+
+            todo!()
+        }
+
+        // TODO: the actual SCT
+    }
 
     Ok(SctOutput {
         flags,
