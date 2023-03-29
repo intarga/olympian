@@ -1,4 +1,7 @@
-use crate::{points::Points, util};
+use crate::{
+    points::{Point, Points},
+    util,
+};
 use std::{error::Error, fmt::Display};
 
 #[derive(Debug)]
@@ -189,6 +192,25 @@ pub fn sct(
     eps2: &Vec<f32>,
     obs_to_check: Option<&Vec<bool>>,
 ) -> Result<SctOutput, QcError> {
+    fn remove_flagged<'a>(
+        neighbours: Vec<&'a Point>,
+        distances: Vec<f32>,
+        flags: &Vec<Flag>,
+    ) -> (Vec<&'a Point>, Vec<f32>) {
+        let vec_length = neighbours.len();
+        let mut neighbours_new = Vec::with_capacity(vec_length);
+        let mut distances_new = Vec::with_capacity(vec_length);
+
+        for i in 0..vec_length {
+            if flags[neighbours[i].data] == Flag::Pass {
+                neighbours_new.push(neighbours[i]);
+                distances_new.push(distances[i]);
+            }
+        }
+
+        (neighbours_new, distances_new)
+    }
+
     let vec_length = values.len();
 
     // should we check lats, lons, etc. individually?

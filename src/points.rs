@@ -7,7 +7,7 @@ pub enum CoordinateType {
     Geodetic,
 }
 
-type Point = GeomWithData<[f32; 3], usize>;
+pub type Point = GeomWithData<[f32; 3], usize>;
 
 pub struct Points {
     pub tree: RTree<Point>,
