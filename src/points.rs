@@ -83,6 +83,32 @@ impl Points {
         }
     }
 
+    pub fn get_neighbours_with_distance(
+        &self,
+        lat: f32,
+        lon: f32,
+        radius: f32,
+        include_match: bool,
+    ) -> (Vec<&Point>, Vec<f32>) {
+        let points = self.get_neighbours(lat, lon, radius, include_match);
+        let vec_length = points.len();
+
+        let mut distances = vec![0.; vec_length];
+
+        let (x, y, z) = convert_coordinates(lat, lon, self.ctype);
+
+        for i in 0..vec_length {
+            let (x1, y1, z1) = convert_coordinates(
+                self.lats[points[i].data],
+                self.lons[points[i].data],
+                self.ctype,
+            );
+            distances[i] = calc_distance_xyz(x, y, z, x1, y1, z1)
+        }
+
+        (points, distances)
+    }
+
     pub fn get_coords_at_index(&self, i: usize) -> (f32, f32, f32, f32) {
         (self.lats[i], self.lons[i], self.elevs[i], self.lafs[i])
     }
