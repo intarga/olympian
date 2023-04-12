@@ -361,6 +361,17 @@ pub fn sct(
                 continue;
             }
 
+            let box_size = neighbours.len();
+            let neighbour_indices: Vec<usize> =
+                neighbours.into_iter().map(|point| point.data).collect();
+
+            // call SCT on this box of values
+            let lats_box = util::subset(&tree_points.lats, &neighbour_indices);
+            let lons_box = util::subset(&tree_points.lons, &neighbour_indices);
+            let elevs_box = util::subset(&tree_points.elevs, &neighbour_indices);
+            let values_box = util::subset(values, &neighbour_indices);
+            let eps2_box = util::subset(eps2, &neighbour_indices);
+
             todo!()
         }
 
