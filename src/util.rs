@@ -15,6 +15,26 @@ pub fn subset<T: Copy>(array: &Vec<T>, indices: &Vec<usize>) -> Vec<T> {
     new_array
 }
 
+pub fn compute_vertical_profile(elevs: &Vec<f32>, values: &Vec<f32>) -> Vec<f32> {
+    // Starting value guesses
+    let gamma: f64 = -0.0065;
+    let a: f64 = 5.;
+
+    let box_size = values.len();
+
+    let mean_t: f32 = values.iter().sum::<f32>() / box_size as f32; // should this be f64?
+
+    // special case when all observations have the same elevation
+    if elevs.iter().min_by(|a, b| a.total_cmp(b)) == elevs.iter().max_by(|a, b| a.total_cmp(b)) {
+        return vec![mean_t; box_size];
+    }
+
+    let exact_p10 = compute_quantile(0.10, elevs);
+    let exact_p90 = compute_quantile(0.90, elevs);
+
+    todo!()
+}
+
 // TODO: replace assertions with errors or remove them
 pub fn compute_quantile(quantile: f32, array: &Vec<f32>) -> f32 {
     let mut new_array: Vec<f32> = array.iter().copied().filter(|x| is_valid(*x)).collect();
