@@ -1,7 +1,8 @@
 use crate::{
-    points::{Point, Points},
+    points::{calc_distance, Point, Points},
     util,
 };
+use faer_core::Mat;
 use std::{error::Error, fmt::Display};
 
 #[derive(Debug)]
@@ -371,6 +372,40 @@ pub fn sct(
             let elevs_box = util::subset(&tree_points.elevs, &neighbour_indices);
             let values_box = util::subset(values, &neighbour_indices);
             let eps2_box = util::subset(eps2, &neighbour_indices);
+
+            // compute the background
+            // TODO: investigate why titanlib allowed negative num_min_prof
+            let vertical_profile = util::compute_vertical_profile(&elevs_box, &values_box);
+
+            let disth: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
+                calc_distance(
+                    lats_box[i],
+                    lons_box[i],
+                    lats_box[j],
+                    lons_box[j],
+                    tree_points.ctype,
+                )
+            });
+            let distz: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
+                (elevs_box[i] - elevs_box[j]).abs()
+            });
+            let dh: Mat<f32> = Mat::with_dims(box_size, 1, |i, _| {
+                let mut dh_vector = Vec::with_capacity(box_size - 1);
+                for j in 0..box_size {
+                    if i != j {
+                        dh_vector.push(disth.read(i, j));
+                    }
+                }
+                util::compute_quantile(0.10, &dh_vector)
+            });
+
+            let dh_mean: f32 = min_horizontal_scale.max(
+                (0..box_size)
+                    .into_iter()
+                    .map(|i| dh.read(i, 1))
+                    .sum::<f32>()
+                    / box_size as f32,
+            );
 
             todo!()
         }

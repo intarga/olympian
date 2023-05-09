@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 rstar = "0.9.3"
+faer-core = "0.8"
