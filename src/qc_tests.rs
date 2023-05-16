@@ -185,7 +185,7 @@ pub fn sct(
     inner_radius: f32,
     outer_radius: f32,
     num_iterations: u32,
-    num_min_prof: u32,
+    num_min_prof: usize,
     min_elev_diff: f32,
     min_horizontal_scale: f32,
     vertical_scale: f32,
@@ -375,7 +375,12 @@ pub fn sct(
 
             // compute the background
             // TODO: investigate why titanlib allowed negative num_min_prof
-            let vertical_profile = util::compute_vertical_profile(&elevs_box, &values_box);
+            let vertical_profile = util::compute_vertical_profile_theil_sen(
+                &elevs_box,
+                &values_box,
+                num_min_prof,
+                min_elev_diff,
+            );
 
             let disth: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
                 calc_distance(

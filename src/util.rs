@@ -15,24 +15,58 @@ pub fn subset<T: Copy>(array: &Vec<T>, indices: &Vec<usize>) -> Vec<T> {
     new_array
 }
 
-pub fn compute_vertical_profile(elevs: &Vec<f32>, values: &Vec<f32>) -> Vec<f32> {
+pub fn compute_vertical_profile_theil_sen(
+    elevs: &Vec<f32>,
+    values: &Vec<f32>,
+    num_min_prof: usize,
+    min_elev_diff: f32,
+) -> Vec<f32> {
+    let n = values.len();
+
     // Starting value guesses
-    let gamma: f64 = -0.0065;
-    let a: f64 = 5.;
-
-    let box_size = values.len();
-
-    let mean_t: f32 = values.iter().sum::<f32>() / box_size as f32; // should this be f64?
+    let gamma: f32 = -0.0065;
+    let mean_t: f32 = values.iter().sum::<f32>() / n as f32; // should this be f64?
 
     // special case when all observations have the same elevation
     if elevs.iter().min_by(|a, b| a.total_cmp(b)) == elevs.iter().max_by(|a, b| a.total_cmp(b)) {
-        return vec![mean_t; box_size];
+        return vec![mean_t; n];
     }
 
-    let exact_p10 = compute_quantile(0.10, elevs);
-    let exact_p90 = compute_quantile(0.90, elevs);
+    // Check if terrain is too flat
+    let z05 = compute_quantile(0.05, elevs);
+    let z95 = compute_quantile(0.95, elevs);
 
-    todo!()
+    // should we use the basic or more complicated vertical profile?
+    let use_basic = n < num_min_prof || (z95 - z05) < min_elev_diff;
+
+    // Theil-Sen (Median-slope) Regression (Wilks (2019), p. 284)
+    let m_median = if use_basic {
+        gamma
+    } else {
+        let nm = n * (n - 1) / 2;
+        let mut m: Vec<f32> = Vec::with_capacity(nm);
+        for i in 0..(n - 1) {
+            for j in (i + 1)..n {
+                m.push(if (elevs[i] - elevs[j]).abs() < 1. {
+                    0.
+                } else {
+                    (values[i] - values[j]) / (elevs[i] - elevs[j])
+                })
+            }
+        }
+        compute_quantile(0.5, &m)
+    };
+    let q: Vec<f32> = values
+        .iter()
+        .zip(elevs)
+        .map(|(val, elev)| val - m_median * elev)
+        .collect();
+    let q_median = compute_quantile(0.5, &q);
+
+    elevs
+        .iter()
+        .map(|elev| q_median + m_median * elev)
+        .collect()
 }
 
 // TODO: replace assertions with errors or remove them
