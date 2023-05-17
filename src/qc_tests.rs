@@ -412,6 +412,18 @@ pub fn sct(
                     / box_size as f32,
             );
 
+            let s: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
+                let value = (-0.5 * (disth.read(i, j) / dh_mean).powi(2)
+                    - 0.5 * (distz.read(i, j) / vertical_scale).powi(2))
+                .exp();
+                // weight the diagonal?? (0.5 default)
+                if i == j {
+                    value + eps2_box[i]
+                } else {
+                    value
+                }
+            });
+
             todo!()
         }
 
