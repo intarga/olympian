@@ -424,6 +424,10 @@ pub fn sct(
                 }
             });
 
+            // difference between actual temp and temp from vertical profile
+            let d: Mat<f32> =
+                Mat::with_dims(box_size, 1, |i, _| values_box[i] - vertical_profile[i]);
+
             todo!()
         }
 
