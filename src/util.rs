@@ -1,3 +1,9 @@
+use faer_core::{MatMut, MatRef};
+use faer_lu::partial_pivoting::{
+    compute::{lu_in_place, lu_in_place_req},
+    inverse::{invert, invert_req},
+};
+
 pub const RADIUS_EARTH: f32 = 6371.0;
 
 pub fn is_valid(value: f32) -> bool {
@@ -99,4 +105,17 @@ pub fn compute_quantile(quantile: f32, array: &Vec<f32>) -> f32 {
     assert!(is_valid(exact_q));
 
     exact_q
+}
+
+pub fn invert_matrix(input: MatRef<'_, f32>, inverse: MatMut<'_, f32>) {
+    let n = input.nrows();
+    let mut lu = input.clone();
+    // let mut lu = input.clone();
+    let mut row_perm = vec![0, n];
+    let mut row_perm_inv = vec![0, n];
+    let (_, row_perm) = lu_in_place(lu., perm, perm_inv, parallelism, stack, params)
+    
+    // invert(dst, lu_factors, row_perm, parallelism, stack);
+
+    todo!()
 }
