@@ -394,23 +394,21 @@ pub fn sct(
             let distz: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
                 (elevs_box[i] - elevs_box[j]).abs()
             });
-            let dh: Mat<f32> = Mat::with_dims(box_size, 1, |i, _| {
-                let mut dh_vector = Vec::with_capacity(box_size - 1);
-                for j in 0..box_size {
-                    if i != j {
-                        dh_vector.push(disth.read(i, j));
+            // TODO: remove dh, and just reduce straight into dh_mean?
+            let dh: Vec<f32> = (0..box_size)
+                .map(|i| {
+                    let mut dh_vector = Vec::with_capacity(box_size - 1);
+                    for j in 0..box_size {
+                        if i != j {
+                            dh_vector.push(disth.read(i, j));
+                        }
                     }
-                }
-                util::compute_quantile(0.10, &dh_vector)
-            });
+                    util::compute_quantile(0.10, &dh_vector)
+                })
+                .collect();
 
-            let dh_mean: f32 = min_horizontal_scale.max(
-                (0..box_size)
-                    .into_iter()
-                    .map(|i| dh.read(i, 1))
-                    .sum::<f32>()
-                    / box_size as f32,
-            );
+            let dh_mean: f32 =
+                min_horizontal_scale.max(dh.into_iter().sum::<f32>() / box_size as f32);
 
             let s: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
                 let value = (-0.5 * (disth.read(i, j) / dh_mean).powi(2)
@@ -425,8 +423,9 @@ pub fn sct(
             });
 
             // difference between actual temp and temp from vertical profile
-            let d: Mat<f32> =
-                Mat::with_dims(box_size, 1, |i, _| values_box[i] - vertical_profile[i]);
+            let d: Vec<f32> = (0..box_size)
+                .map(|i| values_box[i] - vertical_profile[i])
+                .collect();
 
             todo!()
         }
