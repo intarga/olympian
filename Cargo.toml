@@ -7,4 +7,7 @@ edition = "2021"
 
 [dependencies]
 rstar = "0.9.3"
-faer-core = "0.8"
+faer-core = "0.9"
+faer-lu = "0.9"
+dyn-stack = "0.9"
+reborrow = "0.5"

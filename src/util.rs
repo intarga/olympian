@@ -1,8 +1,10 @@
-use faer_core::{MatMut, MatRef};
+use dyn_stack::{DynStack, GlobalMemBuffer};
+use faer_core::{Mat, Parallelism};
 use faer_lu::partial_pivoting::{
     compute::{lu_in_place, lu_in_place_req},
     inverse::{invert, invert_req},
 };
+use reborrow::Reborrow;
 
 pub const RADIUS_EARTH: f32 = 6371.0;
 
@@ -107,15 +109,36 @@ pub fn compute_quantile(quantile: f32, array: &Vec<f32>) -> f32 {
     exact_q
 }
 
-pub fn invert_matrix(input: MatRef<'_, f32>, inverse: MatMut<'_, f32>) {
+pub fn invert_matrix(input: &Mat<f32>) -> Mat<f32> {
     let n = input.nrows();
+
     let mut lu = input.clone();
-    // let mut lu = input.clone();
     let mut row_perm = vec![0, n];
     let mut row_perm_inv = vec![0, n];
-    let (_, row_perm) = lu_in_place(lu., perm, perm_inv, parallelism, stack, params)
-    
-    // invert(dst, lu_factors, row_perm, parallelism, stack);
 
-    todo!()
+    let (_, row_perm) = lu_in_place(
+        lu.as_mut(),
+        &mut row_perm,
+        &mut row_perm_inv,
+        // TODO: can we give a better parallelism hint?
+        Parallelism::Rayon(0),
+        DynStack::new(&mut GlobalMemBuffer::new(
+            // TODO: do something about this unwrap
+            lu_in_place_req::<f32>(n, n, Parallelism::Rayon(0), Default::default()).unwrap(),
+        )),
+        Default::default(),
+    );
+
+    let mut inv = Mat::zeros(n, n);
+    invert(
+        inv.as_mut(),
+        lu.as_ref(),
+        row_perm.rb(),
+        Parallelism::Rayon(0),
+        DynStack::new(&mut GlobalMemBuffer::new(
+            invert_req::<f32>(n, n, Parallelism::Rayon(0)).unwrap(),
+        )),
+    );
+
+    inv
 }
