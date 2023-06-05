@@ -320,7 +320,7 @@ pub fn sct(
         // keep track of which observations have been checked
         let mut checked = vec![false; vec_length];
 
-        let count_oi: u32 = 0;
+        let mut count_oi: u32 = 0;
 
         for i in 0..vec_length {
             if let Some(obs_to_check_inner) = obs_to_check {
@@ -410,7 +410,7 @@ pub fn sct(
             let dh_mean: f32 =
                 min_horizontal_scale.max(dh.into_iter().sum::<f32>() / box_size as f32);
 
-            let s: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
+            let mut s: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
                 let value = (-0.5 * (disth.read(i, j) / dh_mean).powi(2)
                     - 0.5 * (distz.read(i, j) / vertical_scale).powi(2))
                 .exp();
@@ -427,7 +427,61 @@ pub fn sct(
                 .map(|i| values_box[i] - vertical_profile[i])
                 .collect();
 
-            todo!()
+            /* ---------------------------------------------------
+            Beginning of real SCT
+            ------------------------------------------------------*/
+
+            // TODO: investigate case of uninvertible (singular) matrices
+            let s_inv = util::invert_matrix(&s);
+
+            // unweight the diagonal
+            for i in 0..box_size {
+                s.write(i, i, s.read(i, i) - eps2_box[i])
+            }
+
+            let s_inv_d: Vec<f32> = (0..box_size)
+                .map(|i| (0..box_size).map(|j| s.read(i, j) * d[j]).sum())
+                .collect();
+
+            let ares_temp: Vec<f32> = (0..box_size)
+                .map(|i| (0..box_size).map(|j| s.read(i, j) * s_inv_d[j]).sum())
+                .collect();
+
+            let z_inv: Vec<f32> = (0..box_size).map(|i| 1. / s_inv.read(i, i)).collect();
+
+            let ares: Vec<f32> = (0..box_size).map(|i| ares_temp[i] - d[i]).collect();
+
+            let cvres: Vec<f32> = (0..box_size).map(|i| -1. * z_inv[i] * s_inv_d[i]).collect();
+
+            let sig2o = 0.01_f32
+                .max((0..box_size).map(|i| d[i] * -1. * ares[i]).sum::<f32>() / box_size as f32);
+
+            let curr = i;
+            let mut ccount = 0;
+            for i in 0..box_size {
+                let index = neighbour_indices[i];
+                if let Some(obs_to_check_inner) = obs_to_check {
+                    if !obs_to_check_inner[index] {
+                        checked[curr] = true;
+                        continue;
+                    }
+                    let dist = distances[i];
+                    if dist <= inner_radius {
+                        let pog: f32 = cvres[i] * ares[i] / sig2o;
+                        assert!(util::is_valid(pog));
+                        prob_gross_error[index] = pog.max(prob_gross_error[index]);
+                        if (cvres[i] < 0. && pog > pos[index])
+                            || (cvres[i] >= 0. && pog > neg[index])
+                        {
+                            flags[index] = Flag::Fail;
+                            num_thrown_out += 1;
+                        }
+                        checked[index] = true;
+                        ccount += 1;
+                    }
+                }
+                count_oi += 1;
+            }
         }
 
         if num_thrown_out == 0 {
