@@ -173,7 +173,6 @@ pub fn buddy_check(
 pub struct SctOutput {
     pub flags: Vec<Flag>,
     pub prob_gross_error: Vec<f32>,
-    pub rep: Vec<f32>,
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -304,7 +303,6 @@ pub fn sct(
 
     let mut flags = vec![Flag::Pass; vec_length];
     let mut prob_gross_error = vec![0.; vec_length];
-    let mut rep = vec![0.; vec_length];
 
     for i in 0..vec_length {
         if !util::is_valid(tree_points.elevs[i]) {
@@ -313,14 +311,12 @@ pub fn sct(
     }
 
     // would it make more sense for this to be a 1-based index?
-    for iteration in 0..num_iterations {
+    for _iteration in 0..num_iterations {
         // resets each loop, for breaking if we don't throw anything new out
         let mut num_thrown_out: u32 = 0;
 
         // keep track of which observations have been checked
         let mut checked = vec![false; vec_length];
-
-        let mut count_oi: u32 = 0;
 
         for i in 0..vec_length {
             if let Some(obs_to_check_inner) = obs_to_check {
@@ -457,7 +453,6 @@ pub fn sct(
                 .max((0..box_size).map(|i| d[i] * -1. * ares[i]).sum::<f32>() / box_size as f32);
 
             let curr = i;
-            let mut ccount = 0;
             for i in 0..box_size {
                 let index = neighbour_indices[i];
                 if let Some(obs_to_check_inner) = obs_to_check {
@@ -477,10 +472,8 @@ pub fn sct(
                             num_thrown_out += 1;
                         }
                         checked[index] = true;
-                        ccount += 1;
                     }
                 }
-                count_oi += 1;
             }
         }
 
@@ -492,7 +485,6 @@ pub fn sct(
     Ok(SctOutput {
         flags,
         prob_gross_error,
-        rep,
     })
 }
 
