@@ -430,7 +430,9 @@ pub fn sct(
             todo!()
         }
 
-        // TODO: the actual SCT
+        if num_thrown_out == 0 {
+            break;
+        }
     }
 
     Ok(SctOutput {
