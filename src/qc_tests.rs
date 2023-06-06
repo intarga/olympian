@@ -196,7 +196,7 @@ pub fn sct(
     fn remove_flagged<'a>(
         neighbours: Vec<&'a Point>,
         distances: Vec<f32>,
-        flags: &Vec<Flag>,
+        flags: &[Flag],
     ) -> (Vec<&'a Point>, Vec<f32>) {
         let vec_length = neighbours.len();
         let mut neighbours_new = Vec::with_capacity(vec_length);

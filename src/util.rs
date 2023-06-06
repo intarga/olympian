@@ -12,7 +12,7 @@ pub fn is_valid(value: f32) -> bool {
     !f32::is_nan(value) && !f32::is_infinite(value)
 }
 
-pub fn subset<T: Copy>(array: &Vec<T>, indices: &Vec<usize>) -> Vec<T> {
+pub fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
     let new_length = indices.len();
     let mut new_array = Vec::with_capacity(new_length);
 
@@ -78,7 +78,7 @@ pub fn compute_vertical_profile_theil_sen(
 }
 
 // TODO: replace assertions with errors or remove them
-pub fn compute_quantile(quantile: f32, array: &Vec<f32>) -> f32 {
+pub fn compute_quantile(quantile: f32, array: &[f32]) -> f32 {
     let mut new_array: Vec<f32> = array.iter().copied().filter(|x| is_valid(*x)).collect();
     new_array.sort_by(|a, b| a.total_cmp(b));
 
