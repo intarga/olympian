@@ -331,7 +331,7 @@ pub fn sct(
                 checked[i] = true;
                 continue;
             }
-            if checked[i] == true {
+            if checked[i] {
                 continue;
             }
 
