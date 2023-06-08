@@ -1,3 +1,5 @@
+use std::iter::repeat;
+
 use dyn_stack::{DynStack, GlobalMemBuffer};
 use faer_core::{Mat, Parallelism};
 use faer_lu::partial_pivoting::{
@@ -113,8 +115,8 @@ pub fn invert_matrix(input: &Mat<f32>) -> Mat<f32> {
     let n = input.nrows();
 
     let mut lu = input.clone();
-    let mut row_perm = vec![0, n];
-    let mut row_perm_inv = vec![0, n];
+    let mut row_perm: Vec<usize> = repeat(0).take(n).collect();
+    let mut row_perm_inv = row_perm.clone();
 
     let (_, row_perm) = lu_in_place(
         lu.as_mut(),
