@@ -436,7 +436,7 @@ pub fn sct(
             }
 
             let s_inv_d: Vec<f32> = (0..box_size)
-                .map(|i| (0..box_size).map(|j| s.read(i, j) * d[j]).sum())
+                .map(|i| (0..box_size).map(|j| s_inv.read(i, j) * d[j]).sum())
                 .collect();
 
             let ares_temp: Vec<f32> = (0..box_size)
