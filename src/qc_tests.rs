@@ -30,7 +30,7 @@ impl Display for QcError {
 
 impl Error for QcError {}
 
-#[derive(Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Flag {
     Pass,
     Fail,
@@ -528,6 +528,38 @@ mod tests {
             )
             .unwrap(),
             [0, 0, 0, 0, 0, 0, 0, 0, 1, 1]
+        )
+    }
+
+    #[test]
+    fn test_sct_simple() {
+        assert_eq!(
+            sct(
+                &Points::from_latlons(
+                    [60.; 3].to_vec(),
+                    [10., 10.01, 10.02].to_vec(),
+                    [0.; 3].to_vec(),
+                    [0.; 3].to_vec(),
+                    crate::points::CoordinateType::Cartesian,
+                ),
+                &[0., 1., 100.],
+                3,
+                10,
+                10000.,
+                10000.,
+                1,
+                0,
+                100.,
+                10000.,
+                200.,
+                &[2.; 3],
+                &[2.; 3],
+                &[0.5; 3],
+                None
+            )
+            .unwrap()
+            .flags,
+            [Flag::Pass, Flag::Pass, Flag::Fail]
         )
     }
 }
