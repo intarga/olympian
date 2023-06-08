@@ -460,19 +460,17 @@ pub fn sct(
                         checked[curr] = true;
                         continue;
                     }
-                    let dist = distances[i];
-                    if dist <= inner_radius {
-                        let pog: f32 = cvres[i] * ares[i] / sig2o;
-                        assert!(util::is_valid(pog));
-                        prob_gross_error[index] = pog.max(prob_gross_error[index]);
-                        if (cvres[i] < 0. && pog > pos[index])
-                            || (cvres[i] >= 0. && pog > neg[index])
-                        {
-                            flags[index] = Flag::Fail;
-                            num_thrown_out += 1;
-                        }
-                        checked[index] = true;
+                }
+                let dist = distances[i];
+                if dist <= inner_radius {
+                    let pog: f32 = cvres[i] * ares[i] / sig2o;
+                    assert!(util::is_valid(pog));
+                    prob_gross_error[index] = pog.max(prob_gross_error[index]);
+                    if (cvres[i] < 0. && pog > pos[index]) || (cvres[i] >= 0. && pog > neg[index]) {
+                        flags[index] = Flag::Fail;
+                        num_thrown_out += 1;
                     }
+                    checked[index] = true;
                 }
             }
         }
