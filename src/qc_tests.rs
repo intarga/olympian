@@ -69,16 +69,16 @@ pub fn step_check(data: [f32; 2], high: f32, max: f32) -> Flag {
 
 #[allow(clippy::too_many_arguments)]
 pub fn buddy_check(
-    tree_points: Points,
-    values: Vec<f32>,
-    radii: Vec<f32>,
-    nums_min: Vec<u32>,
+    tree_points: &Points,
+    values: &[f32],
+    radii: &[f32],
+    nums_min: &[u32],
     threshold: f32,
     max_elev_diff: f32,
     elev_gradient: f32,
     min_std: f32,
     num_iterations: u32,
-    obs_to_check: Vec<bool>,
+    obs_to_check: &[bool],
 ) -> Result<Vec<u32>, Box<dyn std::error::Error>> {
     // TODO: Check input vectors are properly sized
 
@@ -178,7 +178,7 @@ pub struct SctOutput {
 #[allow(clippy::too_many_arguments)]
 pub fn sct(
     tree_points: &Points,
-    values: &Vec<f32>,
+    values: &[f32],
     num_min: usize,
     num_max: usize,
     inner_radius: f32,
@@ -188,10 +188,10 @@ pub fn sct(
     min_elev_diff: f32,
     min_horizontal_scale: f32,
     vertical_scale: f32,
-    pos: &Vec<f32>,
-    neg: &Vec<f32>,
-    eps2: &Vec<f32>,
-    obs_to_check: Option<&Vec<bool>>,
+    pos: &[f32],
+    neg: &[f32],
+    eps2: &[f32],
+    obs_to_check: Option<&[bool]>,
 ) -> Result<SctOutput, QcError> {
     fn remove_flagged<'a>(
         neighbours: Vec<&'a Point>,
@@ -522,22 +522,22 @@ mod tests {
     fn test_buddy_check() {
         assert_eq!(
             buddy_check(
-                Points::from_latlons(
+                &Points::from_latlons(
                     LATS.to_vec(),
                     LONS.to_vec(),
                     ELEVS.to_vec(),
                     LAFS.to_vec(),
                     crate::points::CoordinateType::Cartesian
                 ),
-                VALUES.to_vec(),
-                RADII.to_vec(),
-                NUMS_MIN.to_vec(),
+                &VALUES,
+                &RADII,
+                &NUMS_MIN,
                 THRESHOLD,
                 MAX_ELEV_DIFF,
                 ELEV_GRADIENT,
                 MIN_STD,
                 NUM_ITERATIONS,
-                OBS_TO_CHECK.to_vec(),
+                &OBS_TO_CHECK,
             )
             .unwrap(),
             [0, 0, 0, 0, 0, 0, 0, 0, 1, 1]
