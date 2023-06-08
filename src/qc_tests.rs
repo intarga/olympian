@@ -304,9 +304,9 @@ pub fn sct(
     let mut flags = vec![Flag::Pass; vec_length];
     let mut prob_gross_error = vec![0.; vec_length];
 
-    for i in 0..vec_length {
-        if !util::is_valid(tree_points.elevs[i]) {
-            flags[i] = Flag::Invalid;
+    for (flag, elev) in flags.iter_mut().zip(tree_points.elevs.iter()) {
+        if !util::is_valid(*elev) {
+            *flag = Flag::Invalid;
         }
     }
 
@@ -431,8 +431,8 @@ pub fn sct(
             let s_inv = util::invert_matrix(&s);
 
             // unweight the diagonal
-            for i in 0..box_size {
-                s.write(i, i, s.read(i, i) - eps2_box[i])
+            for (i, eps2) in eps2_box.iter().enumerate() {
+                s.write(i, i, s.read(i, i) - eps2)
             }
 
             let s_inv_d: Vec<f32> = (0..box_size)
