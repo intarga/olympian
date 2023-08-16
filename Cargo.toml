@@ -2,6 +2,11 @@
 name = "olympian"
 version = "0.1.0"
 edition = "2021"
+description = "Quality control routines for meteorological observations"
+repository = "https://github.com/intarga/olympian/"
+license = "LGPL-3.0-only"
+keywords = ["qc", "quality_control", "weather", "meteorology", "climate"]
+categories = ["science::geo"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
