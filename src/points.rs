@@ -1,6 +1,7 @@
 use crate::util;
 use rstar::{primitives::GeomWithData, RTree};
 
+// TODO: deprecate this distinction
 #[derive(Clone, Copy)]
 pub enum CoordinateType {
     Cartesian,

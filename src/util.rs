@@ -8,13 +8,13 @@ use faer_lu::partial_pivoting::{
 };
 use reborrow::Reborrow;
 
-pub const RADIUS_EARTH: f32 = 6371.0;
+pub(crate) const RADIUS_EARTH: f32 = 6371.0;
 
-pub fn is_valid(value: f32) -> bool {
+pub(crate) fn is_valid(value: f32) -> bool {
     !f32::is_nan(value) && !f32::is_infinite(value)
 }
 
-pub fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
+pub(crate) fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
     let new_length = indices.len();
     let mut new_array = Vec::with_capacity(new_length);
 
@@ -25,7 +25,7 @@ pub fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
     new_array
 }
 
-pub fn compute_vertical_profile_theil_sen(
+pub(crate) fn compute_vertical_profile_theil_sen(
     elevs: &Vec<f32>,
     values: &Vec<f32>,
     num_min_prof: usize,
@@ -80,7 +80,7 @@ pub fn compute_vertical_profile_theil_sen(
 }
 
 // TODO: replace assertions with errors or remove them
-pub fn compute_quantile(quantile: f32, array: &[f32]) -> f32 {
+pub(crate) fn compute_quantile(quantile: f32, array: &[f32]) -> f32 {
     let mut new_array: Vec<f32> = array.iter().copied().filter(|x| is_valid(*x)).collect();
     new_array.sort_by(|a, b| a.total_cmp(b));
 
@@ -111,7 +111,7 @@ pub fn compute_quantile(quantile: f32, array: &[f32]) -> f32 {
     exact_q
 }
 
-pub fn invert_matrix(input: &Mat<f32>) -> Mat<f32> {
+pub(crate) fn invert_matrix(input: &Mat<f32>) -> Mat<f32> {
     let n = input.nrows();
 
     let mut lu = input.clone();
