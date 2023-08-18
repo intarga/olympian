@@ -1,5 +1,4 @@
-use super::Error;
-use crate::{util, util::spatial_tree::SpatialPoint, Flag, SpatialTree};
+use crate::{util, util::spatial_tree::SpatialPoint, Error, Flag, SpatialTree};
 use dyn_stack::{DynStack, GlobalMemBuffer};
 use faer_core::{Mat, Parallelism};
 use faer_lu::partial_pivoting::{

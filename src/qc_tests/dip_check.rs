@@ -1,5 +1,4 @@
-use super::Error;
-use crate::Flag;
+use crate::{Error, Flag};
 
 pub fn dip_check(data: &[Option<f32>], high: f32, max: f32) -> Result<Flag, Error> {
     if data.len() != 3 {
