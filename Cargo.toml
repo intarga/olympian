@@ -1,6 +1,6 @@
 [package]
 name = "olympian"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "Quality control routines for meteorological observations"
 repository = "https://github.com/intarga/olympian/"
@@ -16,3 +16,4 @@ faer-core = "0.9"
 faer-lu = "0.9"
 dyn-stack = "0.9"
 reborrow = "0.5"
+thiserror = "1.0.47"
