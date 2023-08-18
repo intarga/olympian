@@ -5,9 +5,9 @@ pub(crate) type SpatialPoint = GeomWithData<[f32; 3], usize>;
 
 pub struct SpatialTree {
     pub(crate) tree: RTree<SpatialPoint>,
-    pub(crate) lats: Vec<f32>,
-    pub(crate) lons: Vec<f32>,
-    pub(crate) elevs: Vec<f32>,
+    pub lats: Vec<f32>,
+    pub lons: Vec<f32>,
+    pub elevs: Vec<f32>,
 }
 
 impl SpatialTree {
