@@ -1,4 +1,3 @@
-// use std::{error::Error, fmt::Display};
 use thiserror::Error;
 
 pub(super) mod buddy_check;

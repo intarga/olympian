@@ -1,8 +1,6 @@
-// use super::QcError;
-// use crate::Flag;
-use crate::{points::Points, util};
+use super::Error;
+use crate::{points::Points, util, Flag};
 
-// TODO: use Flag and local Error
 #[allow(clippy::too_many_arguments)]
 pub fn buddy_check(
     tree_points: &Points,
@@ -15,12 +13,18 @@ pub fn buddy_check(
     min_std: f32,
     num_iterations: u32,
     obs_to_check: &[bool],
-) -> Result<Vec<u32>, Box<dyn std::error::Error>> {
+) -> Result<Vec<Flag>, Error> {
     // TODO: Check input vectors are properly sized
 
-    let mut flags: Vec<u32> = values
+    let mut flags: Vec<Flag> = values
         .iter()
-        .map(|v| if util::is_valid(*v) { 0 } else { 1 })
+        .map(|v| {
+            if util::is_valid(*v) {
+                Flag::Pass
+            } else {
+                Flag::Fail
+            }
+        })
         .collect();
 
     let check_all = obs_to_check.len() != values.len();
@@ -36,7 +40,7 @@ pub fn buddy_check(
                 nums_min[i]
             };
 
-            if flags[i] != 0 {
+            if flags[i] != Flag::Pass {
                 continue;
             }
 
@@ -51,7 +55,7 @@ pub fn buddy_check(
                         let (_, _, neighbour_elev, _) =
                             tree_points.get_coords_at_index(neighbour.data);
 
-                        if flags[neighbour.data] != 0 {
+                        if flags[neighbour.data] != Flag::Pass {
                             continue;
                         }
 
@@ -87,13 +91,15 @@ pub fn buddy_check(
                     );
 
                     if (values[i] - mean).abs() / std_adjusted > threshold {
-                        flags[i] = 1;
+                        flags[i] = Flag::Fail;
                     }
                 }
             }
         }
 
-        let num_removed: u32 = flags.iter().sum();
+        let num_removed: u32 = flags
+            .iter()
+            .fold(0, |acc, flag| acc + (*flag != Flag::Pass) as u32);
         let num_removed_current_iteration = num_removed - num_removed_last_iteration;
 
         if num_removed_current_iteration == 0 {
@@ -145,7 +151,18 @@ mod tests {
                 &[true; BUDDY_N],
             )
             .unwrap(),
-            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1]
+            [
+                Flag::Pass,
+                Flag::Pass,
+                Flag::Pass,
+                Flag::Pass,
+                Flag::Pass,
+                Flag::Pass,
+                Flag::Pass,
+                Flag::Pass,
+                Flag::Fail,
+                Flag::Fail
+            ]
         )
     }
 }
