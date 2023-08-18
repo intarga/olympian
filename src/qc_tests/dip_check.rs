@@ -1,9 +1,9 @@
-use super::QcError;
+use super::Error;
 use crate::Flag;
 
-pub fn dip_check(data: &[Option<f32>], high: f32, max: f32) -> Result<Flag, QcError> {
+pub fn dip_check(data: &[Option<f32>], high: f32, max: f32) -> Result<Flag, Error> {
     if data.len() != 3 {
-        return Err(QcError::InvalidInputShape("data".to_string()));
+        return Err(Error::InvalidInputShape("data".to_string()));
     }
 
     if data.contains(&None) {

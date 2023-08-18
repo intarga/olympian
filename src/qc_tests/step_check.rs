@@ -1,9 +1,9 @@
-use super::QcError;
+use super::Error;
 use crate::Flag;
 
-pub fn step_check(data: &[Option<f32>], high: f32, max: f32) -> Result<Flag, QcError> {
+pub fn step_check(data: &[Option<f32>], high: f32, max: f32) -> Result<Flag, Error> {
     if data.len() != 2 {
-        return Err(QcError::InvalidInputShape("data".to_string()));
+        return Err(Error::InvalidInputShape("data".to_string()));
     }
 
     if data.contains(&None) {

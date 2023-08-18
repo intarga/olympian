@@ -1,32 +1,16 @@
-use std::{error::Error, fmt::Display};
+// use std::{error::Error, fmt::Display};
+use thiserror::Error;
 
 pub(super) mod buddy_check;
 pub(super) mod dip_check;
 pub(super) mod sct;
 pub(super) mod step_check;
 
-// TODO: use thiserror
-#[derive(Debug)]
-pub enum QcError {
+#[derive(Error, Debug)]
+#[non_exhaustive]
+pub enum Error {
+    #[error("input vector {0} does not have compatible size")]
     InvalidInputShape(String),
-    InvalidArg((String, String)),
+    #[error("argument {0} does not have a valid value: {1}")]
+    InvalidArg(String, String),
 }
-
-impl Display for QcError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            Self::InvalidInputShape(cause) => {
-                write!(f, "input vector {} does not have compatible size", cause)
-            }
-            Self::InvalidArg((argname, reason)) => {
-                write!(
-                    f,
-                    "argument {} does not have a valid value: {}",
-                    argname, reason
-                )
-            }
-        }
-    }
-}
-
-impl Error for QcError {}

@@ -1,4 +1,4 @@
-use super::QcError;
+use super::Error;
 use crate::{
     points::{calc_distance, Point, Points},
     util, Flag,
@@ -27,7 +27,7 @@ pub fn sct(
     neg: &[f32],
     eps2: &[f32],
     obs_to_check: Option<&[bool]>,
-) -> Result<SctOutput, QcError> {
+) -> Result<SctOutput, Error> {
     fn remove_flagged<'a>(
         neighbours: Vec<&'a Point>,
         distances: Vec<f32>,
@@ -51,88 +51,88 @@ pub fn sct(
 
     // should we check lats, lons, etc. individually?
     if tree_points.tree.size() != vec_length {
-        return Err(QcError::InvalidInputShape(String::from("tree_points")));
+        return Err(Error::InvalidInputShape(String::from("tree_points")));
     }
     if pos.len() != vec_length {
-        return Err(QcError::InvalidInputShape(String::from("pos")));
+        return Err(Error::InvalidInputShape(String::from("pos")));
     }
     if neg.len() != vec_length {
-        return Err(QcError::InvalidInputShape(String::from("neg")));
+        return Err(Error::InvalidInputShape(String::from("neg")));
     }
     if eps2.len() != vec_length {
-        return Err(QcError::InvalidInputShape(String::from("eps2")));
+        return Err(Error::InvalidInputShape(String::from("eps2")));
     }
     if let Some(obs_to_check_inner) = obs_to_check {
         if obs_to_check_inner.len() != vec_length {
-            return Err(QcError::InvalidInputShape(String::from("obs_to_check")));
+            return Err(Error::InvalidInputShape(String::from("obs_to_check")));
         }
     }
     if num_min < 2 {
-        return Err(QcError::InvalidArg((
+        return Err(Error::InvalidArg(
             String::from("num_min"),
             String::from("must be > 1"),
-        )));
+        ));
     }
     if num_max < num_min {
-        return Err(QcError::InvalidArg((
+        return Err(Error::InvalidArg(
             String::from("num_max"),
             String::from("must be > num_min"),
-        )));
+        ));
     }
     if num_iterations < 1 {
-        return Err(QcError::InvalidArg((
+        return Err(Error::InvalidArg(
             String::from("num_iterations"),
             String::from("must be >= 1"),
-        )));
+        ));
     }
     if min_elev_diff <= 0. {
-        return Err(QcError::InvalidArg((
+        return Err(Error::InvalidArg(
             String::from("min_elev_diff"),
             String::from("must be > 0"),
-        )));
+        ));
     }
     if min_horizontal_scale <= 0. {
-        return Err(QcError::InvalidArg((
+        return Err(Error::InvalidArg(
             String::from("min_horizontal_scale"),
             String::from("must be > 0"),
-        )));
+        ));
     }
     if vertical_scale <= 0. {
-        return Err(QcError::InvalidArg((
+        return Err(Error::InvalidArg(
             String::from("vertical_scale"),
             String::from("must be > 0"),
-        )));
+        ));
     }
     if inner_radius < 0. {
-        return Err(QcError::InvalidArg((
+        return Err(Error::InvalidArg(
             String::from("inner_radius"),
             String::from("must be >= 0"),
-        )));
+        ));
     }
     if outer_radius < inner_radius {
-        return Err(QcError::InvalidArg((
+        return Err(Error::InvalidArg(
             String::from("outer_radius"),
             String::from("must be >= inner_radius"),
-        )));
+        ));
     }
     for i in 0..vec_length {
         if eps2[i] <= 0. {
-            return Err(QcError::InvalidArg((
+            return Err(Error::InvalidArg(
                 String::from("eps2"),
                 String::from("all values must be > 0"),
-            )));
+            ));
         }
         if pos[i] < 0. {
-            return Err(QcError::InvalidArg((
+            return Err(Error::InvalidArg(
                 String::from("pos"),
-                String::from("all values must be >= 0"),
-            )));
+                String::from("all values must be >= "),
+            ));
         }
         if neg[i] < 0. {
-            return Err(QcError::InvalidArg((
+            return Err(Error::InvalidArg(
                 String::from("neg"),
                 String::from("all values must be >= 0"),
-            )));
+            ));
         }
     }
 
