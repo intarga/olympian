@@ -12,7 +12,7 @@ mod util;
 pub use util::spatial_tree::SpatialTree;
 pub use util::Flag;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone)]
 #[non_exhaustive]
 pub enum Error {
     #[error("input vector {0} does not have compatible size")]
