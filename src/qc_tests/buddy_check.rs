@@ -45,14 +45,14 @@ pub fn buddy_check(
             }
 
             if check_all || obs_to_check[i] {
-                let (lat, lon, elev, _) = tree_points.get_coords_at_index(i);
+                let (lat, lon, elev) = tree_points.get_coords_at_index(i);
                 let neighbours = tree_points.get_neighbours(lat, lon, radius, false);
 
                 let mut list_buddies: Vec<f32> = Vec::new();
 
                 if neighbours.len() >= num_min as usize {
                     for neighbour in neighbours {
-                        let (_, _, neighbour_elev, _) =
+                        let (_, _, neighbour_elev) =
                             tree_points.get_coords_at_index(neighbour.data);
 
                         if flags[neighbour.data] != Flag::Pass {
@@ -137,8 +137,6 @@ mod tests {
                     ]
                     .to_vec(),
                     [0.; BUDDY_N].to_vec(),
-                    [0.; BUDDY_N].to_vec(),
-                    crate::points::CoordinateType::Cartesian
                 ),
                 &[0., 0., 0., 0., 0., 0., 0., 0., 0.1, 1.],
                 &[10000.],

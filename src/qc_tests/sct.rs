@@ -356,13 +356,7 @@ pub fn sct(
             );
 
             let disth: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
-                calc_distance(
-                    lats_box[i],
-                    lons_box[i],
-                    lats_box[j],
-                    lons_box[j],
-                    tree_points.ctype,
-                )
+                calc_distance(lats_box[i], lons_box[i], lats_box[j], lons_box[j])
             });
             let distz: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
                 (elevs_box[i] - elevs_box[j]).abs()
@@ -475,8 +469,6 @@ mod tests {
                     [60.; 3].to_vec(),
                     [10., 10.01, 10.02].to_vec(),
                     [0.; 3].to_vec(),
-                    [0.; 3].to_vec(),
-                    crate::points::CoordinateType::Cartesian,
                 ),
                 &[0., 1., 100.],
                 3,
