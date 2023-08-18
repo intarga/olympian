@@ -8,11 +8,6 @@ use faer_lu::partial_pivoting::{
 use reborrow::Reborrow;
 use std::iter::repeat;
 
-pub struct SctOutput {
-    pub flags: Vec<Flag>,
-    pub prob_gross_error: Vec<f32>,
-}
-
 fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
     let new_length = indices.len();
     let mut new_array = Vec::with_capacity(new_length);
@@ -184,7 +179,7 @@ pub fn sct(
     neg: &[f32],
     eps2: &[f32],
     obs_to_check: Option<&[bool]>,
-) -> Result<SctOutput, Error> {
+) -> Result<Vec<Flag>, Error> {
     let vec_length = values.len();
 
     // should we check lats, lons, etc. individually?
@@ -447,10 +442,7 @@ pub fn sct(
         }
     }
 
-    Ok(SctOutput {
-        flags,
-        prob_gross_error,
-    })
+    Ok(flags)
 }
 
 #[cfg(test)]
@@ -481,8 +473,7 @@ mod tests {
                 &[0.5; 3],
                 None
             )
-            .unwrap()
-            .flags,
+            .unwrap(),
             [Flag::Pass, Flag::Pass, Flag::Fail]
         )
     }
