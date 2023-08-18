@@ -6,9 +6,6 @@ pub use qc_tests::{
     step_check::step_check,
 };
 
-mod flag;
-pub use flag::Flag;
-
-pub mod points;
-
 mod util;
+pub use util::spatial_tree::SpatialTree;
+pub use util::Flag;

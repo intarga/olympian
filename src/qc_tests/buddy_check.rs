@@ -1,5 +1,5 @@
 use super::Error;
-use crate::{points::SpatialTree, util, Flag};
+use crate::{util, Flag, SpatialTree};
 
 #[allow(clippy::too_many_arguments)]
 pub fn buddy_check(

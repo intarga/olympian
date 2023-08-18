@@ -1,13 +1,13 @@
 use crate::util;
 use rstar::{primitives::GeomWithData, RTree};
 
-pub type SpatialPoint = GeomWithData<[f32; 3], usize>;
+pub(crate) type SpatialPoint = GeomWithData<[f32; 3], usize>;
 
 pub struct SpatialTree {
-    pub tree: RTree<SpatialPoint>,
-    pub lats: Vec<f32>,
-    pub lons: Vec<f32>,
-    pub elevs: Vec<f32>,
+    pub(crate) tree: RTree<SpatialPoint>,
+    pub(crate) lats: Vec<f32>,
+    pub(crate) lons: Vec<f32>,
+    pub(crate) elevs: Vec<f32>,
 }
 
 impl SpatialTree {
@@ -40,14 +40,14 @@ impl SpatialTree {
         }
     }
 
-    pub fn get_neighbours(
+    pub(crate) fn get_neighbours(
         &self,
         lat: f32,
         lon: f32,
         radius: f32,
         include_match: bool,
     ) -> Vec<&SpatialPoint> {
-        let (x, y, z) = convert_coordinates(lat, lon);
+        let (x, y, z) = util::convert_coordinates(lat, lon);
 
         let match_iter = self.tree.locate_within_distance([x, y, z], radius);
 
@@ -59,7 +59,7 @@ impl SpatialTree {
         }
     }
 
-    pub fn get_neighbours_with_distance(
+    pub(crate) fn get_neighbours_with_distance(
         &self,
         lat: f32,
         lon: f32,
@@ -71,44 +71,18 @@ impl SpatialTree {
 
         let mut distances = vec![0.; vec_length];
 
-        let (x, y, z) = convert_coordinates(lat, lon);
+        let (x, y, z) = util::convert_coordinates(lat, lon);
 
         for i in 0..vec_length {
             let (x1, y1, z1) =
-                convert_coordinates(self.lats[points[i].data], self.lons[points[i].data]);
-            distances[i] = calc_distance_xyz(x, y, z, x1, y1, z1)
+                util::convert_coordinates(self.lats[points[i].data], self.lons[points[i].data]);
+            distances[i] = util::calc_distance_xyz(x, y, z, x1, y1, z1)
         }
 
         (points, distances)
     }
 
-    pub fn get_coords_at_index(&self, i: usize) -> (f32, f32, f32) {
+    pub(crate) fn get_coords_at_index(&self, i: usize) -> (f32, f32, f32) {
         (self.lats[i], self.lons[i], self.elevs[i])
     }
-}
-
-pub fn convert_coordinates(lat: f32, lon: f32) -> (f32, f32, f32) {
-    (
-        lat.to_radians().cos() * lon.to_radians().cos() * util::RADIUS_EARTH,
-        lat.to_radians().cos() * lon.to_radians().sin() * util::RADIUS_EARTH,
-        lat.to_radians().sin() * util::RADIUS_EARTH,
-    )
-}
-
-pub fn calc_distance(lat1: f32, lon1: f32, lat2: f32, lon2: f32) -> f32 {
-    // TODO: check latlon validity?
-    let lat1r = lat1.to_radians();
-    let lat2r = lat2.to_radians();
-    let lon1r = lon1.to_radians();
-    let lon2r = lon2.to_radians();
-
-    let ratio = lat1r.cos() * lon1r.cos() * lat2r.cos() * lon2r.cos()
-        + lat1r.cos() * lon1r.sin() * lat2r.cos() * lon2r.sin()
-        + lat1r.sin() * lat2r.sin();
-
-    ratio.acos() * util::RADIUS_EARTH
-}
-
-pub fn calc_distance_xyz(x0: f32, y0: f32, z0: f32, x1: f32, y1: f32, z1: f32) -> f32 {
-    ((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1) + (z0 - z1) * (z0 - z1)).sqrt()
 }

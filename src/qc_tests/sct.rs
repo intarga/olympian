@@ -1,8 +1,5 @@
 use super::Error;
-use crate::{
-    points::{calc_distance, SpatialPoint, SpatialTree},
-    util, Flag,
-};
+use crate::{util, util::spatial_tree::SpatialPoint, Flag, SpatialTree};
 use dyn_stack::{DynStack, GlobalMemBuffer};
 use faer_core::{Mat, Parallelism};
 use faer_lu::partial_pivoting::{
@@ -356,7 +353,7 @@ pub fn sct(
             );
 
             let disth: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
-                calc_distance(lats_box[i], lons_box[i], lats_box[j], lons_box[j])
+                util::calc_distance(lats_box[i], lons_box[i], lats_box[j], lons_box[j])
             });
             let distz: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
                 (elevs_box[i] - elevs_box[j]).abs()
