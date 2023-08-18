@@ -1,6 +1,6 @@
 use super::Error;
 use crate::{
-    points::{calc_distance, Point, Points},
+    points::{calc_distance, SpatialPoint, SpatialTree},
     util, Flag,
 };
 use faer_core::Mat;
@@ -12,7 +12,7 @@ pub struct SctOutput {
 
 #[allow(clippy::too_many_arguments)]
 pub fn sct(
-    tree_points: &Points,
+    tree_points: &SpatialTree,
     values: &[f32],
     num_min: usize,
     num_max: usize,
@@ -29,10 +29,10 @@ pub fn sct(
     obs_to_check: Option<&[bool]>,
 ) -> Result<SctOutput, Error> {
     fn remove_flagged<'a>(
-        neighbours: Vec<&'a Point>,
+        neighbours: Vec<&'a SpatialPoint>,
         distances: Vec<f32>,
         flags: &[Flag],
-    ) -> (Vec<&'a Point>, Vec<f32>) {
+    ) -> (Vec<&'a SpatialPoint>, Vec<f32>) {
         let vec_length = neighbours.len();
         let mut neighbours_new = Vec::with_capacity(vec_length);
         let mut distances_new = Vec::with_capacity(vec_length);
@@ -181,7 +181,7 @@ pub fn sct(
                 remove_flagged(neighbours_unfiltered, distances_unfiltered, &flags);
 
             if neighbours.len() > num_max {
-                let mut pairs: Vec<(&Point, f32)> =
+                let mut pairs: Vec<(&SpatialPoint, f32)> =
                     neighbours.into_iter().zip(distances.into_iter()).collect();
                 pairs.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
 
@@ -329,7 +329,7 @@ mod tests {
     fn test_sct_simple() {
         assert_eq!(
             sct(
-                &Points::from_latlons(
+                &SpatialTree::from_latlons(
                     [60.; 3].to_vec(),
                     [10., 10.01, 10.02].to_vec(),
                     [0.; 3].to_vec(),

@@ -8,10 +8,10 @@ pub enum CoordinateType {
     Geodetic,
 }
 
-pub type Point = GeomWithData<[f32; 3], usize>;
+pub type SpatialPoint = GeomWithData<[f32; 3], usize>;
 
-pub struct Points {
-    pub tree: RTree<Point>,
+pub struct SpatialTree {
+    pub tree: RTree<SpatialPoint>,
     pub lats: Vec<f32>,
     pub lons: Vec<f32>,
     pub elevs: Vec<f32>,
@@ -19,7 +19,7 @@ pub struct Points {
     pub ctype: CoordinateType,
 }
 
-impl Points {
+impl SpatialTree {
     pub fn from_latlons(
         lats: Vec<f32>,
         lons: Vec<f32>,
@@ -29,19 +29,19 @@ impl Points {
     ) -> Self {
         //TODO: ensure vecs are the same size
 
-        let raw_points: Vec<Point> = match ctype {
+        let raw_points: Vec<SpatialPoint> = match ctype {
             CoordinateType::Cartesian => lats
                 .iter()
                 .zip(lons.iter())
                 .enumerate()
-                .map(|(i, (lat, lon))| Point::new([*lat, *lon, 0.0], i))
+                .map(|(i, (lat, lon))| SpatialPoint::new([*lat, *lon, 0.0], i))
                 .collect(),
             CoordinateType::Geodetic => lats
                 .iter()
                 .zip(lons.iter())
                 .enumerate()
                 .map(|(i, (lat, lon))| {
-                    Point::new(
+                    SpatialPoint::new(
                         [
                             (lat.to_radians().cos() * lon.to_radians().cos() * util::RADIUS_EARTH),
                             (lat.to_radians().cos() * lon.to_radians().sin() * util::RADIUS_EARTH),
@@ -71,7 +71,7 @@ impl Points {
         lon: f32,
         radius: f32,
         include_match: bool,
-    ) -> Vec<&Point> {
+    ) -> Vec<&SpatialPoint> {
         let (x, y, z) = convert_coordinates(lat, lon, self.ctype);
 
         let match_iter = self.tree.locate_within_distance([x, y, z], radius);
@@ -90,7 +90,7 @@ impl Points {
         lon: f32,
         radius: f32,
         include_match: bool,
-    ) -> (Vec<&Point>, Vec<f32>) {
+    ) -> (Vec<&SpatialPoint>, Vec<f32>) {
         let points = self.get_neighbours(lat, lon, radius, include_match);
         let vec_length = points.len();
 

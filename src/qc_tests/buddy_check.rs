@@ -1,9 +1,9 @@
 use super::Error;
-use crate::{points::Points, util, Flag};
+use crate::{points::SpatialTree, util, Flag};
 
 #[allow(clippy::too_many_arguments)]
 pub fn buddy_check(
-    tree_points: &Points,
+    tree_points: &SpatialTree,
     values: &[f32],
     radii: &[f32],
     nums_min: &[u32],
@@ -121,7 +121,7 @@ mod tests {
     fn test_buddy_check() {
         assert_eq!(
             buddy_check(
-                &Points::from_latlons(
+                &SpatialTree::from_latlons(
                     [60.; BUDDY_N].to_vec(),
                     [
                         60.,
