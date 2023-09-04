@@ -475,6 +475,35 @@ mod tests {
             )
             .unwrap(),
             [Flag::Pass, Flag::Pass, Flag::Fail]
-        )
+        );
+
+        const N: usize = 10000;
+        assert_eq!(
+            sct(
+                &SpatialTree::from_latlons(
+                    (0..N).map(|i| ((i as f32).powi(2) * 0.001) % 1.).collect(),
+                    (0..N)
+                        .map(|i| ((i as f32 + 1.).powi(2) * 0.001) % 1.)
+                        .collect(),
+                    vec![1.; N],
+                ),
+                &vec![1.; N],
+                5,
+                100,
+                50000.,
+                150000.,
+                5,
+                20,
+                200.,
+                10000.,
+                200.,
+                &vec![4.; N],
+                &vec![8.; N],
+                &vec![0.5; N],
+                Some(&vec![true; N])
+            )
+            .unwrap(),
+            vec![Flag::Pass; N]
+        );
     }
 }
