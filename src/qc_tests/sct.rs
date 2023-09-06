@@ -347,7 +347,8 @@ pub fn sct(
             );
 
             let disth: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
-                util::calc_distance(lats_box[i], lons_box[i], lats_box[j], lons_box[j])
+                // TODO: remove this unwrap
+                util::calc_distance(lats_box[i], lons_box[i], lats_box[j], lons_box[j]).unwrap()
             });
             let distz: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
                 (elevs_box[i] - elevs_box[j]).abs()
