@@ -33,14 +33,8 @@ impl SpatialTree {
             .zip(lons.iter())
             .enumerate()
             .map(|(i, (lat, lon))| {
-                SpatialPoint::new(
-                    [
-                        (lat.to_radians().cos() * lon.to_radians().cos() * util::RADIUS_EARTH),
-                        (lat.to_radians().cos() * lon.to_radians().sin() * util::RADIUS_EARTH),
-                        (lat.to_radians().sin() * util::RADIUS_EARTH),
-                    ],
-                    i,
-                )
+                let (x, y, z) = util::convert_coordinates(*lat, *lon);
+                SpatialPoint::new([x, y, z], i)
             })
             .collect();
 
