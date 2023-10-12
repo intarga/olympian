@@ -1,6 +1,6 @@
 [package]
 name = "olympian"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 description = "Quality control routines for meteorological observations"
 repository = "https://github.com/intarga/olympian/"

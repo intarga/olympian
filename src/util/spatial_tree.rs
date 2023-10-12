@@ -3,6 +3,7 @@ use rstar::{primitives::GeomWithData, RTree};
 
 pub(crate) type SpatialPoint = GeomWithData<[f32; 3], usize>;
 
+#[derive(Debug, Clone)]
 pub struct SpatialTree {
     pub(crate) tree: RTree<SpatialPoint>,
     pub lats: Vec<f32>,
