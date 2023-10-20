@@ -12,8 +12,7 @@ categories = ["science::geo"]
 
 [dependencies]
 rstar = "0.9.3"
-faer-core = "0.9"
-faer-lu = "0.9"
+faer = "0.13"
 dyn-stack = "0.9"
 reborrow = "0.5"
 thiserror = "1.0.47"

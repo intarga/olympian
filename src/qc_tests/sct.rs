@@ -1,12 +1,5 @@
 use crate::{util, util::spatial_tree::SpatialPoint, Error, Flag, SpatialTree};
-use dyn_stack::{DynStack, GlobalMemBuffer};
-use faer_core::{Mat, Parallelism};
-use faer_lu::partial_pivoting::{
-    compute::{lu_in_place, lu_in_place_req},
-    inverse::{invert, invert_req},
-};
-use reborrow::Reborrow;
-use std::iter::repeat;
+use faer::{solvers::SolverCore, Faer, Mat};
 
 fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
     let new_length = indices.len();
@@ -110,37 +103,8 @@ fn compute_quantile(quantile: f32, array: &[f32]) -> f32 {
 }
 
 fn invert_matrix(input: &Mat<f32>) -> Mat<f32> {
-    let n = input.nrows();
-
-    let mut lu = input.clone();
-    let mut row_perm: Vec<usize> = repeat(0).take(n).collect();
-    let mut row_perm_inv = row_perm.clone();
-
-    let (_, row_perm) = lu_in_place(
-        lu.as_mut(),
-        &mut row_perm,
-        &mut row_perm_inv,
-        // TODO: can we give a better parallelism hint?
-        Parallelism::Rayon(0),
-        DynStack::new(&mut GlobalMemBuffer::new(
-            // TODO: do something about this unwrap
-            lu_in_place_req::<f32>(n, n, Parallelism::Rayon(0), Default::default()).unwrap(),
-        )),
-        Default::default(),
-    );
-
-    let mut inv = Mat::zeros(n, n);
-    invert(
-        inv.as_mut(),
-        lu.as_ref(),
-        row_perm.rb(),
-        Parallelism::Rayon(0),
-        DynStack::new(&mut GlobalMemBuffer::new(
-            invert_req::<f32>(n, n, Parallelism::Rayon(0)).unwrap(),
-        )),
-    );
-
-    inv
+    let lu = input.partial_piv_lu();
+    lu.inverse()
 }
 
 fn remove_flagged<'a>(
@@ -346,11 +310,11 @@ pub fn sct(
                 min_elev_diff,
             );
 
-            let disth: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
+            let disth: Mat<f32> = Mat::from_fn(box_size, box_size, |i, j| {
                 // TODO: remove this unwrap
                 util::calc_distance(lats_box[i], lons_box[i], lats_box[j], lons_box[j]).unwrap()
             });
-            let distz: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
+            let distz: Mat<f32> = Mat::from_fn(box_size, box_size, |i, j| {
                 (elevs_box[i] - elevs_box[j]).abs()
             });
             // TODO: remove dh, and just reduce straight into dh_mean?
@@ -369,7 +333,7 @@ pub fn sct(
             let dh_mean: f32 =
                 min_horizontal_scale.max(dh.into_iter().sum::<f32>() / box_size as f32);
 
-            let mut s: Mat<f32> = Mat::with_dims(box_size, box_size, |i, j| {
+            let mut s: Mat<f32> = Mat::from_fn(box_size, box_size, |i, j| {
                 let value = (-0.5 * (disth.read(i, j) / dh_mean).powi(2)
                     - 0.5 * (distz.read(i, j) / vertical_scale).powi(2))
                 .exp();
