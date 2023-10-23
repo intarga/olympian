@@ -1,15 +1,31 @@
+//! Utility types and functions for QC tests
+
 pub mod spatial_tree;
 use crate::Error;
 
+/// Flag indicating result of a QC test for a given data point
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub enum Flag {
+    /// The data point passed the QC test with no issues
     Pass,
+    /// The data point failed the QC test
     Fail,
+    /// The data point did not fail, but was inside a "warning" threshold
     Warn,
+    /// The QC test was inconclusive
     Inconclusive,
+    /// The input was invalid, so the data point could not be QCed
     Invalid,
+    /// Some data needed for the test was missing
+    ///
+    /// This may have been the data point being QCed, or some other data that
+    /// was needed to QC it. For example, a step check also needs the
+    /// preceeding data point
     DataMissing,
+    /// The data point did not have enough neighbours in the given radius
+    ///
+    /// Only relevant for spatial tests
     Isolated,
 }
 
@@ -19,6 +35,7 @@ pub(crate) fn is_valid(value: f32) -> bool {
     !f32::is_nan(value) && !f32::is_infinite(value)
 }
 
+/// convert lat-lon to xyz coordinates
 pub(crate) fn convert_coordinates(lat: f32, lon: f32) -> (f32, f32, f32) {
     (
         lat.to_radians().cos() * lon.to_radians().cos() * RADIUS_EARTH,
@@ -27,6 +44,7 @@ pub(crate) fn convert_coordinates(lat: f32, lon: f32) -> (f32, f32, f32) {
     )
 }
 
+/// find the distance in km between two lat-lon points
 pub(crate) fn calc_distance(lat1: f32, lon1: f32, lat2: f32, lon2: f32) -> Result<f32, Error> {
     // lons are checked against 360 here, not 180, because some people apparently use
     // conventions of 0-360 and -360-0...
@@ -55,6 +73,7 @@ pub(crate) fn calc_distance(lat1: f32, lon1: f32, lat2: f32, lon2: f32) -> Resul
     Ok(norm_ratio.acos() * RADIUS_EARTH)
 }
 
+/// find the distance in km between two xyz points
 pub(crate) fn calc_distance_xyz(x0: f32, y0: f32, z0: f32, x1: f32, y1: f32, z1: f32) -> f32 {
     ((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1) + (z0 - z1) * (z0 - z1)).sqrt()
 }
