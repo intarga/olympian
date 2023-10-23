@@ -1,3 +1,5 @@
+// #![deny(missing_docs)]
+
 use thiserror::Error;
 
 mod qc_tests;
