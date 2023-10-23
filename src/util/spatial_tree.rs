@@ -1,8 +1,16 @@
 use crate::util;
 use rstar::{primitives::GeomWithData, RTree};
 
+/// A point in the [`SpatialTree`]
+///
+/// The `[f32; 3]` represents the xyz coordinates of the point, which is used
+/// to spatially index, and the usize represents the index into the lats, lons,
+/// elevs, and values arrays associated with that point.
 pub(crate) type SpatialPoint = GeomWithData<[f32; 3], usize>;
 
+/// An R-tree to spatially index data to spatially index data
+///
+/// This allows a data point's nearest neighbours to be found with ease
 #[derive(Debug, Clone)]
 pub struct SpatialTree {
     pub(crate) tree: RTree<SpatialPoint>,
@@ -12,6 +20,11 @@ pub struct SpatialTree {
 }
 
 impl SpatialTree {
+    /// Construct a SpatialTree from a set of positions
+    ///
+    /// The positions are specified by vectors of lats, lons, and elevs, where
+    /// the elements from each vector at a given index together specify a
+    /// single point in space
     pub fn from_latlons(lats: Vec<f32>, lons: Vec<f32>, elevs: Vec<f32>) -> Self {
         //TODO: ensure vecs are the same size
 
