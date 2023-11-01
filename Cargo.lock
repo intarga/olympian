@@ -193,9 +193,9 @@ dependencies = [
 
 [[package]]
 name = "faer"
-version = "0.13.5"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4905b6836d612c74917cf9f61e80c4414e206ca4c9dc916dd899417432701807"
+checksum = "04b7f7dad8a4aeff63096a8db31ddfa544baaff47b1cf7a5db31b56b51819a8d"
 dependencies = [
  "assert2",
  "coe-rs",
@@ -208,15 +208,15 @@ dependencies = [
  "faer-svd",
  "matrixcompare",
  "num-complex",
- "pulp",
+ "pulp 0.17.1",
  "reborrow",
 ]
 
 [[package]]
 name = "faer-cholesky"
-version = "0.13.5"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17ba86ddc423b96a98894380a46837ac1632cb246b235dadd3809ba50af2aa01"
+checksum = "51b4f662b57a31fb743240936602063637623cb871acc7a86479df81f106e99a"
 dependencies = [
  "assert2",
  "bytemuck",
@@ -225,16 +225,16 @@ dependencies = [
  "faer-entity",
  "num-complex",
  "num-traits",
- "pulp",
+ "pulp 0.17.1",
  "reborrow",
  "seq-macro",
 ]
 
 [[package]]
 name = "faer-core"
-version = "0.13.5"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d28e2a6201b308ca0a9deab31dd78c7a082def44e570794e0f31f988ed96a65"
+checksum = "09e9ad4c2acfd0e0c911cbd7276b8fb6a7e22ccbd998b4080e148cf001f2b267"
 dependencies = [
  "assert2",
  "bytemuck",
@@ -246,7 +246,7 @@ dependencies = [
  "num-complex",
  "num-traits",
  "paste",
- "pulp",
+ "pulp 0.17.1",
  "rayon",
  "reborrow",
  "seq-macro",
@@ -254,24 +254,24 @@ dependencies = [
 
 [[package]]
 name = "faer-entity"
-version = "0.13.5"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ae358f623e3fa5a60651fa6f9c4fc81281e654777aef27c4103b14180e75073"
+checksum = "f5241a0fce43ff8bda51d8ecb4427e152a75b2340edb97b308b63021ed2a1967"
 dependencies = [
  "bytemuck",
  "coe-rs",
  "libm",
  "num-complex",
  "num-traits",
- "pulp",
+ "pulp 0.17.1",
  "reborrow",
 ]
 
 [[package]]
 name = "faer-evd"
-version = "0.13.5"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70fa81fc2e9c96552fa46656409825927bdb4913fd750e401d6583463fe9bfbd"
+checksum = "5e4f18e2ea44465f15ea22267280d00c9ac1dec8120fff372771ad6de1ef0a1e"
 dependencies = [
  "assert2",
  "bytemuck",
@@ -283,15 +283,15 @@ dependencies = [
  "libm",
  "num-complex",
  "num-traits",
- "pulp",
+ "pulp 0.17.1",
  "reborrow",
 ]
 
 [[package]]
 name = "faer-lu"
-version = "0.13.5"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa5d26339325fa0b24ea40a61e4e15f6cb89e91610eba9a15729481af805ce0f"
+checksum = "14a7d382978305e2016204cee01ef4846c509db85a6631613aefa1ac5bd540d6"
 dependencies = [
  "assert2",
  "bytemuck",
@@ -302,15 +302,15 @@ dependencies = [
  "num-complex",
  "num-traits",
  "paste",
- "pulp",
+ "pulp 0.17.1",
  "reborrow",
 ]
 
 [[package]]
 name = "faer-qr"
-version = "0.13.5"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cff6ff0677f5083194ff312267586f53ce0894cdf816633f604b752928ae9ec7"
+checksum = "e80b5e11c7cdc417bc124c92e9c47c02cddc13b6e87a1381bb276a0bf5e07e73"
 dependencies = [
  "assert2",
  "bytemuck",
@@ -320,16 +320,16 @@ dependencies = [
  "faer-entity",
  "num-complex",
  "num-traits",
- "pulp",
+ "pulp 0.17.1",
  "rayon",
  "reborrow",
 ]
 
 [[package]]
 name = "faer-svd"
-version = "0.13.5"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cfef5577af1a6679d91087d1076b4c917461743c69ccd8b2feae435746255a7"
+checksum = "41303083ad96da55336b11c667a65761060741d6f5d72c90a2437fb79b3e3510"
 dependencies = [
  "assert2",
  "bytemuck",
@@ -340,7 +340,7 @@ dependencies = [
  "faer-qr",
  "num-complex",
  "num-traits",
- "pulp",
+ "pulp 0.17.1",
  "reborrow",
 ]
 
@@ -407,7 +407,7 @@ dependencies = [
  "num-traits",
  "once_cell",
  "paste",
- "pulp",
+ "pulp 0.16.4",
  "raw-cpuid",
  "rayon",
  "seq-macro",
@@ -630,6 +630,17 @@ name = "pulp"
 version = "0.16.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dcb0a2934e77dd9aabb33fedcd3bf6ea1d6d3cacd4c5bc07b9a916f7b101c6b7"
+dependencies = [
+ "bytemuck",
+ "libm",
+ "num-complex",
+]
+
+[[package]]
+name = "pulp"
+version = "0.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b3bef241cc27671d8dc6425796134738f2d76fd4ebc878130e069a9c1d74e8b0"
 dependencies = [
  "bytemuck",
  "libm",
