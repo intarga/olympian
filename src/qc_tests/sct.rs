@@ -1,4 +1,4 @@
-use crate::{util, util::spatial_tree::SpatialPoint, Error, Flag, SpatialTree};
+use crate::{util, util::spatial_tree::SpatialPoint, Error, Flag, SpatialCache};
 use faer::{solvers::SolverCore, Mat};
 
 fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
@@ -128,8 +128,7 @@ fn remove_flagged<'a>(
 
 #[allow(clippy::too_many_arguments)]
 pub fn sct(
-    tree_points: &SpatialTree,
-    values: &[f32],
+    data: &SpatialCache,
     num_min: usize,
     num_max: usize,
     inner_radius: f32,
@@ -144,10 +143,11 @@ pub fn sct(
     eps2: &[f32],
     obs_to_check: Option<&[bool]>,
 ) -> Result<Vec<Flag>, Error> {
-    let vec_length = values.len();
+    let vec_length = data.values.len();
 
     // should we check lats, lons, etc. individually?
-    if tree_points.tree.size() != vec_length {
+    // move to constructor?
+    if data.rtree.tree.size() != vec_length {
         return Err(Error::InvalidInputShape(String::from("tree_points")));
     }
     if pos.len() != vec_length {
@@ -236,7 +236,7 @@ pub fn sct(
     let mut flags = vec![Flag::Pass; vec_length];
     let mut prob_gross_error = vec![0.; vec_length];
 
-    for (flag, elev) in flags.iter_mut().zip(tree_points.elevs.iter()) {
+    for (flag, elev) in flags.iter_mut().zip(data.rtree.elevs.iter()) {
         if !util::is_valid(*elev) {
             *flag = Flag::Invalid;
         }
@@ -267,10 +267,10 @@ pub fn sct(
                 continue;
             }
 
-            let (neighbours_unfiltered, distances_unfiltered) = tree_points
-                .get_neighbours_with_distance(
-                    tree_points.lats[i],
-                    tree_points.lons[i],
+            let (neighbours_unfiltered, distances_unfiltered) =
+                data.rtree.get_neighbours_with_distance(
+                    data.rtree.lats[i],
+                    data.rtree.lons[i],
                     outer_radius,
                     true,
                 );
@@ -295,10 +295,10 @@ pub fn sct(
                 neighbours.into_iter().map(|point| point.data).collect();
 
             // call SCT on this box of values
-            let lats_box = subset(&tree_points.lats, &neighbour_indices);
-            let lons_box = subset(&tree_points.lons, &neighbour_indices);
-            let elevs_box = subset(&tree_points.elevs, &neighbour_indices);
-            let values_box = subset(values, &neighbour_indices);
+            let lats_box = subset(&data.rtree.lats, &neighbour_indices);
+            let lons_box = subset(&data.rtree.lons, &neighbour_indices);
+            let elevs_box = subset(&data.rtree.elevs, &neighbour_indices);
+            let values_box = subset(data.data(), &neighbour_indices);
             let eps2_box = subset(eps2, &neighbour_indices);
 
             // compute the background
@@ -418,12 +418,12 @@ mod tests {
     fn test_sct_simple() {
         assert_eq!(
             sct(
-                &SpatialTree::from_latlons(
+                &SpatialCache::new(
                     [60.; 3].to_vec(),
                     [10., 10.01, 10.02].to_vec(),
                     [0.; 3].to_vec(),
+                    [0., 1., 100.].to_vec(),
                 ),
-                &[0., 1., 100.],
                 3,
                 10,
                 10000.,
@@ -445,14 +445,14 @@ mod tests {
         const N: usize = 10000;
         assert_eq!(
             sct(
-                &SpatialTree::from_latlons(
+                &SpatialCache::new(
                     (0..N).map(|i| ((i as f32).powi(2) * 0.001) % 1.).collect(),
                     (0..N)
                         .map(|i| ((i as f32 + 1.).powi(2) * 0.001) % 1.)
                         .collect(),
                     vec![1.; N],
+                    vec![1.; N],
                 ),
-                &vec![1.; N],
                 5,
                 100,
                 50000.,

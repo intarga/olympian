@@ -1,9 +1,8 @@
-use crate::{util, Error, Flag, SpatialTree};
+use crate::{util, Error, Flag, SpatialCache};
 
 #[allow(clippy::too_many_arguments)]
 pub fn buddy_check(
-    tree_points: &SpatialTree,
-    values: &[f32],
+    data: &SpatialCache,
     radii: &[f32],
     nums_min: &[u32],
     threshold: f32,
@@ -15,7 +14,8 @@ pub fn buddy_check(
 ) -> Result<Vec<Flag>, Error> {
     // TODO: Check input vectors are properly sized
 
-    let mut flags: Vec<Flag> = values
+    let mut flags: Vec<Flag> = data
+        .values
         .iter()
         .map(|v| {
             if util::is_valid(*v) {
@@ -26,12 +26,12 @@ pub fn buddy_check(
         })
         .collect();
 
-    let check_all = obs_to_check.len() != values.len();
+    let check_all = obs_to_check.len() != data.values.len();
 
     let mut num_removed_last_iteration = 0;
 
     for _iteration in 1..=num_iterations {
-        for i in 0..values.len() {
+        for i in 0..data.values.len() {
             let radius = if radii.len() == 1 { radii[0] } else { radii[i] };
             let num_min = if nums_min.len() == 1 {
                 nums_min[0]
@@ -44,15 +44,14 @@ pub fn buddy_check(
             }
 
             if check_all || obs_to_check[i] {
-                let (lat, lon, elev) = tree_points.get_coords_at_index(i);
-                let neighbours = tree_points.get_neighbours(lat, lon, radius, false);
+                let (lat, lon, elev) = data.rtree.get_coords_at_index(i);
+                let neighbours = data.rtree.get_neighbours(lat, lon, radius, false);
 
                 let mut list_buddies: Vec<f32> = Vec::new();
 
                 if neighbours.len() >= num_min as usize {
                     for neighbour in neighbours {
-                        let (_, _, neighbour_elev) =
-                            tree_points.get_coords_at_index(neighbour.data);
+                        let (_, _, neighbour_elev) = data.rtree.get_coords_at_index(neighbour.data);
 
                         if flags[neighbour.data] != Flag::Pass {
                             continue;
@@ -63,12 +62,12 @@ pub fn buddy_check(
 
                             if elev_diff.abs() <= max_elev_diff {
                                 let adjusted_value =
-                                    values[neighbour.data] + (elev_diff * elev_gradient);
+                                    data.values[neighbour.data] + (elev_diff * elev_gradient);
 
                                 list_buddies.push(adjusted_value);
                             }
                         } else {
-                            list_buddies.push(values[neighbour.data]);
+                            list_buddies.push(data.values[neighbour.data]);
                         }
                     }
                 }
@@ -89,7 +88,7 @@ pub fn buddy_check(
                         |x, y| x.partial_cmp(y).unwrap_or(std::cmp::Ordering::Equal),
                     );
 
-                    if (values[i] - mean).abs() / std_adjusted > threshold {
+                    if (data.values[i] - mean).abs() / std_adjusted > threshold {
                         flags[i] = Flag::Fail;
                     }
                 }
@@ -120,7 +119,7 @@ mod tests {
     fn test_buddy_check() {
         assert_eq!(
             buddy_check(
-                &SpatialTree::from_latlons(
+                &SpatialCache::new(
                     [60.; BUDDY_N].to_vec(),
                     [
                         60.,
@@ -136,8 +135,8 @@ mod tests {
                     ]
                     .to_vec(),
                     [0.; BUDDY_N].to_vec(),
+                    [0., 0., 0., 0., 0., 0., 0., 0., 0.1, 1.].to_vec()
                 ),
-                &[0., 0., 0., 0., 0., 0., 0., 0., 0.1, 1.],
                 &[10000.],
                 &[1],
                 1.,
