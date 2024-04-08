@@ -1,7 +1,10 @@
 //! Utility types and functions for QC tests
 
 pub mod spatial_tree;
+use spatial_tree::SpatialTree;
+
 use crate::Error;
+use chronoutil::RelativeDuration;
 
 /// Flag indicating result of a QC test for a given data point
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -27,6 +30,61 @@ pub enum Flag {
     ///
     /// Only relevant for spatial tests
     Isolated,
+}
+
+/// Unix timestamp, inner i64 is seconds since unix epoch
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Timestamp(pub i64);
+
+/// Container of series data
+#[derive(Debug, Clone, PartialEq)]
+pub struct SeriesCache {
+    /// Time of the first observation in data
+    pub start_time: Timestamp,
+    /// Period of the timeseries, i.e. the time gap between successive elements
+    pub period: RelativeDuration,
+    /// Data points of the timeseries in chronological order
+    ///
+    /// `None`s represent gaps in the series
+    pub values: Vec<Option<f32>>,
+    /// The number of extra points in the series before the data to be QCed
+    ///
+    /// These points are needed because certain timeseries tests need more
+    /// context around points to be able to QC them.
+    pub num_leading_points: u8,
+    /// The number of extra points in the series after the data to be QCed
+    ///
+    /// These points are needed because certain timeseries tests need more
+    /// context around points to be able to QC them.
+    pub num_trailing_points: u8,
+}
+
+/// Container of spatial data
+///
+/// a [`new`](SpatialCache::new) method is provided to
+/// avoid the need to construct an R*-tree manually
+#[derive(Debug, Clone)]
+pub struct SpatialCache {
+    /// an [R*-tree](https://en.wikipedia.org/wiki/R*-tree) used to spatially
+    /// index the data
+    pub(crate) rtree: SpatialTree,
+    /// Data points in the spatial slice
+    pub values: Vec<f32>,
+}
+
+impl SpatialCache {
+    /// Create a new SpatialCache without manually constructing the R*-tree
+    pub fn new(lats: Vec<f32>, lons: Vec<f32>, elevs: Vec<f32>, values: Vec<f32>) -> Self {
+        // TODO: ensure vecs have same size
+        Self {
+            rtree: SpatialTree::from_latlons(lats, lons, elevs),
+            values,
+        }
+    }
+
+    pub fn data(&self) -> &Vec<f32> {
+        &self.values
+    }
 }
 
 pub(crate) const RADIUS_EARTH: f32 = 6371.0;

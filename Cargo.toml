@@ -14,3 +14,4 @@ categories = ["science::geo"]
 rstar = "0.12.0"
 faer = "0.18"
 thiserror = "1.0.58"
+chronoutil = "0.2.6"

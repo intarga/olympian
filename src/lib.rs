@@ -8,8 +8,9 @@ pub use qc_tests::{
 };
 
 mod util;
-pub use util::spatial_tree::SpatialTree;
 pub use util::Flag;
+pub use util::SeriesCache;
+pub use util::SpatialCache;
 
 #[derive(Error, Debug, Clone)]
 #[non_exhaustive]
