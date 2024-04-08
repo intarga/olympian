@@ -13,8 +13,8 @@ fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
 }
 
 fn compute_vertical_profile_theil_sen(
-    elevs: &Vec<f32>,
-    values: &Vec<f32>,
+    elevs: &[f32],
+    values: &[f32],
     num_min_prof: usize,
     min_elev_diff: f32,
 ) -> Vec<f32> {
