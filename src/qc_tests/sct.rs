@@ -1,5 +1,5 @@
 use crate::{util, util::spatial_tree::SpatialPoint, Error, Flag, SpatialTree};
-use faer::{solvers::SolverCore, Faer, Mat};
+use faer::{solvers::SolverCore, Mat};
 
 fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
     let new_length = indices.len();
