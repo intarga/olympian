@@ -1,5 +1,49 @@
 use crate::{util, Error, Flag, SpatialCache};
 
+/// Spatial QC test that compares an observation against its neighbours (i.e buddies) and flags
+/// outliers.
+///
+/// The check looks for buddies of an observation (at index i) in a neighbourhood specified by
+/// `radii[i]` [m], which is the radius of a circle around the observation to be checked. A minimum
+/// number of observations (`nums_min[i]`) is required to be available inside the circle and the
+/// range of elevations in the circle must not exceed `max_elev_diff` meters . The number of
+/// iterations is set by `num_iterations`.
+///
+/// The buddy check flags observations if the (absolute value of the) difference between the
+/// observations and the average of the neighbours normalized by the standard deviation in the
+/// circle is greater than a predefined `threshold`. If the standard deviation of values in the
+/// neighbourhood is less than `min_std`, then a value of `min_std` is used instead. `min_std`
+/// should be roughly equal to the standard deviation of the error of a typical observation. If it
+/// is too low, then too many observations will be flaged in areas where the variability is low.
+///
+/// In the case of temperature, elevation differences should be taken into account because all
+/// observations are reported to the elevation of the centroid observation before averaging. A
+/// linear vertical rate of change of temperature can be set by `elev_gradient`. A recommended
+/// value is `elev_gradient=-0.0065` &deg;C/m (as defined in the ICAO international standard
+/// atmosphere). If `max_elev_diff` is negative then elevation difference is not checked and the
+/// observed values are not corrected.
+///
+/// It is possible to specify an optional vector `obs_to_check` to specify whether an observation
+/// should be checked. The length of `obs_to_check` must be the same as the vector with the values
+/// to check. The buddy check is performed only for values where the corresponding `obs_to_check`
+/// element is set to true, while all values are always used as buddies for checking the data
+/// quality.
+///
+/// ## Input parameters
+///
+/// | Parameter      | Unit | Description |
+/// | -------------- | ---- | ----------- |
+/// | data           | N/A  | See [`SpatialCache`] |
+/// | radii          | m    | Search radius |
+/// | nums_min       | N/A  | The minimum number of buddies a station can have |
+/// | threshold      | σ    | the variance threshold for flagging a station |
+/// | max_elev_diff	 | m    | the maximum difference in elevation for a buddy (if negative will not check for heigh difference) |
+/// | elev_gradient  | ou/m | linear elevation gradient with height |
+/// | min_std        | N/A  | If the standard deviation of values in a neighborhood are less than min_std, min_std will be used instead |
+/// | num_iterations | N/A  | The number of iterations to perform |
+/// | obs_to_check*  | N/A  | Observations that will be checked. true=check the corresponding observation. Unchecked observations will be used to QC others, but will not be QCed themselves |
+///
+/// \* optional, ou = Unit of the observation, σ = Standard deviations
 #[allow(clippy::too_many_arguments)]
 pub fn buddy_check(
     data: &SpatialCache,
