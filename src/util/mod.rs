@@ -61,8 +61,10 @@ pub struct SeriesCache {
 
 /// Container of spatial data
 ///
-/// a [`new`](SpatialCache::new) method is provided to
-/// avoid the need to construct an R*-tree manually
+/// This contains the values of the data along with an [R*-tree](https://en.wikipedia.org/wiki/R*-tree)
+/// used to spatially index them. A [`new`](SpatialCache::new) method is provided to avoid the
+/// need to construct an R*-tree manually, instead users need only provide the latitude, longitude
+/// (in degrees), and elevation (in meters) for each value.
 #[derive(Debug, Clone)]
 pub struct SpatialCache {
     /// an [R*-tree](https://en.wikipedia.org/wiki/R*-tree) used to spatially
