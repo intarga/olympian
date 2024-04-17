@@ -1,4 +1,35 @@
-// #![deny(missing_docs)]
+//! Quality control routines for meteorological data.
+//!
+//! In addition to the routines themselves, this crate also provides a [`Flag`] type, as well as
+//! [`SeriesCache`] and [`SpatialCache`] as standard formats for data to be fed into timeseries
+//! and spatial QC tests respectively.
+//!
+//! ```
+//! use olympian::{buddy_check, Flag, SpatialCache};
+//!
+//! assert_eq!(
+//!     buddy_check(
+//!         &SpatialCache::new(
+//!             [60., 60., 60.].to_vec(),
+//!             [60., 60.00011111, 60.00022222].to_vec(),
+//!             [0., 0., 0.].to_vec(),
+//!             [0., 0., 1.].to_vec()
+//!         ),
+//!         &[10000.],
+//!         &[1],
+//!         1.,
+//!         200.,
+//!         -0.0065,
+//!         0.01,
+//!         2,
+//!         &[true, true, true],
+//!     )
+//!     .unwrap(),
+//!     [Flag::Pass, Flag::Pass, Flag::Fail]
+//! )
+//! ```
+
+#![warn(missing_docs)]
 
 use thiserror::Error;
 
