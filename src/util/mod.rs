@@ -84,6 +84,8 @@ impl SpatialCache {
         }
     }
 
+    // TODO: rename to values?
+    /// Get a reference to the values held inside the SpatialCache
     pub fn data(&self) -> &Vec<f32> {
         &self.values
     }
