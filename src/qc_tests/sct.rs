@@ -126,6 +126,65 @@ fn remove_flagged<'a>(
     (neighbours_new, distances_new)
 }
 
+/// Spatial QC test that compares an observation to an expected value generated from it's
+/// neighbours, taking their distance and elevation into account.
+///
+/// The SCT compares each observation to what is expected given the other observations in the nearby
+/// area. If the deviation is large, the observation is removed. The SCT uses optimal interpolation
+/// (OI) to compute an expected value for each observation. The background for the OI is computed
+/// from a general vertical profile of observations in the area.
+///
+/// When a given observation is being processed, the `outer_radius` [m] defines which other
+/// observations will be used to determine if the observation should be flagged or not. This can be
+/// computationally expensive, if a new circle of observation is used when processing the next
+/// observation. To save time, the calculations used for one observation can be reused for all
+/// other observations within the `inner_radius` [m].
+///
+/// The test will only be performed if there are at least `num_min` observations inside the outer
+/// circle. Also, to reduce computation time, only the nearest `num_max` observations will be used
+/// in the outer circle, even if there are more available observations. The SCT inverts a matrix
+/// with the same dimensions as the number of available observations, so preventing really
+/// large matrices in observation dense areas significantly lowers computation times.
+///
+/// The thresholds for determining if an observation is removed is set by `pos` and `neg`. `pos`
+/// sets the number of standard deviations above the expected value a given observation is allowed
+/// before being flagged. Similarly, `neg` is used for negative deviations. Different deviations
+/// for positive and negative are useful for sun-exposed temperature sensors in cold inversion
+/// conditions, where large negative deviations are more likely to be valid than positive ones.
+///
+/// An adaptive horizontal decorrelation length is determined automatically, however a minimum
+/// allowed value can be set by `dhmin` [m]. The vertical decorrelation lengthscale is set by `dz`
+/// [m].
+///
+/// The background for the OI is computed by finding a suitable vertical profile of the
+/// observations in the outer circle. `dzmin` [m] sets the minimum elevation range required to
+/// compute a vertical profile.
+///
+/// `num_iterations` specifies how many sweeps of all observations will be performed. Observations
+/// removed in earlier iterations will not be used in the calculations in later iterations.
+///
+///  ![Image](https://github.com/metno/titanlib/wiki/images/sct.png)
+///
+/// ## Input parameters
+///
+/// | Parameter            | Unit | Description |
+/// | -------------------- | ---- | ----------- |
+/// | data                 | N/A  | See [`SpatialCache`] |
+/// | num_min              | N/A  | If an observation has fewer neighbours than this it will not be QCed |
+/// | num_max              | N/A  | A cap on the number of neighbours used to compute the expected value |
+/// | inner_radius         | m    | Radius in which OI will be reused |
+/// | outer_radius         | m    | Radius for computing OI and background |
+/// | num_iterations       | N/A  | The number of iterations to perform |
+/// | num_min_prof         | N/A  | Minimum number of observations to compute vertical profile |
+/// | min_elev_diff	       | m    | Minimum elevation difference to compute vertical profile |
+/// | min_horizontal_scale | m    | Minimum horizontal decorrelation length |
+/// | vertical_scale       | m    | Vertical decorrelation length |
+/// | pos                  | σ    | Positive deviation allowed |
+/// | neg                  | σ    | Negative deviation allowed |
+/// | eps2	               | N/A  | Ratio of observation error variance to background variance |
+/// | obs_to_check*        | N/A  | Observations that will be checked. true=check the corresponding observation. Unchecked observations will be used to QC others, but will not be QCed themselves |
+///
+/// \* optional, ou = Unit of the observation, σ = Standard deviations
 #[allow(clippy::too_many_arguments)]
 pub fn sct(
     data: &SpatialCache,
