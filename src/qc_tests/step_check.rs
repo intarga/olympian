@@ -1,5 +1,18 @@
 use crate::{Error, Flag, SeriesCache};
 
+/// Timeseries QC test that compares each observation against its immediate predecessor.
+///
+/// If the absolute value of the difference between the observed value and it's predecessor is
+/// greater than max, Flag::Fail will be returned for that observation, if greater than high,
+/// Flag::Warn, if either value if missing, Flag::DataMissing, else Flag::Pass.
+///
+/// As a predecessor to each observation is needed, the [`SeriesCache`] provided must have
+/// `num_leading_points` >= 1.
+///
+/// ## Errors
+///
+/// - data is invalid
+/// - data has `num_leading_points` <= 1
 pub fn step_check(data: &SeriesCache, high: f32, max: f32) -> Result<Vec<Flag>, Error> {
     let (leading_trim, lead_overflow) = data.num_leading_points.overflowing_sub(1);
 
