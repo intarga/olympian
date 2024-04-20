@@ -176,12 +176,12 @@ fn remove_flagged<'a>(
 /// | outer_radius         | m    | Radius for computing OI and background |
 /// | num_iterations       | N/A  | The number of iterations to perform |
 /// | num_min_prof         | N/A  | Minimum number of observations to compute vertical profile |
-/// | min_elev_diff	       | m    | Minimum elevation difference to compute vertical profile |
+/// | min_elev_diff        | m    | Minimum elevation difference to compute vertical profile |
 /// | min_horizontal_scale | m    | Minimum horizontal decorrelation length |
 /// | vertical_scale       | m    | Vertical decorrelation length |
 /// | pos                  | σ    | Positive deviation allowed |
 /// | neg                  | σ    | Negative deviation allowed |
-/// | eps2	               | N/A  | Ratio of observation error variance to background variance |
+/// | eps2                 | N/A  | Ratio of observation error variance to background variance |
 /// | obs_to_check*        | N/A  | Observations that will be checked. true=check the corresponding observation. Unchecked observations will be used to QC others, but will not be QCed themselves |
 ///
 /// \* optional, ou = Unit of the observation, σ = Standard deviations

@@ -37,7 +37,7 @@ use crate::{util, Error, Flag, SpatialCache};
 /// | radii          | m    | Search radius |
 /// | nums_min       | N/A  | The minimum number of buddies a station can have |
 /// | threshold      | σ    | the variance threshold for flagging a station |
-/// | max_elev_diff	 | m    | the maximum difference in elevation for a buddy (if negative will not check for heigh difference) |
+/// | max_elev_diff  | m    | the maximum difference in elevation for a buddy (if negative will not check for heigh difference) |
 /// | elev_gradient  | ou/m | linear elevation gradient with height |
 /// | min_std        | N/A  | If the standard deviation of values in a neighborhood are less than min_std, min_std will be used instead |
 /// | num_iterations | N/A  | The number of iterations to perform |
