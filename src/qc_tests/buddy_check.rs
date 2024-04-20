@@ -54,7 +54,7 @@ pub fn buddy_check(
     elev_gradient: f32,
     min_std: f32,
     num_iterations: u32,
-    obs_to_check: &[bool],
+    obs_to_check: Option<&[bool]>,
 ) -> Result<Vec<Flag>, Error> {
     // TODO: Check input vectors are properly sized
 
@@ -69,8 +69,6 @@ pub fn buddy_check(
             }
         })
         .collect();
-
-    let check_all = obs_to_check.len() != data.values.len();
 
     let mut num_removed_last_iteration = 0;
 
@@ -87,7 +85,7 @@ pub fn buddy_check(
                 continue;
             }
 
-            if check_all || obs_to_check[i] {
+            if obs_to_check.map_or(true, |inner| inner[i]) {
                 let (lat, lon, elev) = data.rtree.get_coords_at_index(i);
                 let neighbours = data.rtree.get_neighbours(lat, lon, radius, false);
 
@@ -188,7 +186,7 @@ mod tests {
                 -0.0065,
                 0.01,
                 2,
-                &[true; BUDDY_N],
+                None,
             )
             .unwrap(),
             [
