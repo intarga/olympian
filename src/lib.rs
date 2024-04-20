@@ -22,7 +22,7 @@
 //!         -0.0065,
 //!         0.01,
 //!         2,
-//!         &[true, true, true],
+//!         None,
 //!     )
 //!     .unwrap(),
 //!     [Flag::Pass, Flag::Pass, Flag::Fail]
