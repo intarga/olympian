@@ -46,14 +46,14 @@ pub fn dip_check(data: &SeriesCache, high: f32, max: f32) -> Result<Vec<Flag>, E
                 let diffsum = ((data[2] - data[1]).abs() + (data[1] - data[0]).abs()).abs();
                 let diffdiff = ((data[2] - data[1]).abs() - (data[1] - data[0]).abs()).abs();
 
-                // TODO: this seems suspicious, shouldn't the max check be first? and can't the
-                // latter condition be lifted out?
-                if diffsum > high && diffdiff < (diffsum * 35. / 100.) {
-                    return Flag::Warn;
-                }
+                if diffdiff < (diffsum * 0.35) {
+                    if diffsum > max {
+                        return Flag::Fail;
+                    }
 
-                if diffsum > max && diffdiff < (diffsum * 35. / 100.) {
-                    return Flag::Fail;
+                    if diffsum > high {
+                        return Flag::Warn;
+                    }
                 }
             }
             Flag::Pass
