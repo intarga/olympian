@@ -134,11 +134,11 @@ fn remove_flagged<'a>(
 /// (OI) to compute an expected value for each observation. The background for the OI is computed
 /// from a general vertical profile of observations in the area.
 ///
-/// When a given observation is being processed, the `outer_radius` [m] defines which other
+/// When a given observation is being processed, the `outer_radius` \[m\] defines which other
 /// observations will be used to determine if the observation should be flagged or not. This can be
 /// computationally expensive, if a new circle of observation is used when processing the next
 /// observation. To save time, the calculations used for one observation can be reused for all
-/// other observations within the `inner_radius` [m].
+/// other observations within the `inner_radius` \[m\].
 ///
 /// The test will only be performed if there are at least `num_min` observations inside the outer
 /// circle. Also, to reduce computation time, only the nearest `num_max` observations will be used
@@ -153,11 +153,11 @@ fn remove_flagged<'a>(
 /// conditions, where large negative deviations are more likely to be valid than positive ones.
 ///
 /// An adaptive horizontal decorrelation length is determined automatically, however a minimum
-/// allowed value can be set by `dhmin` [m]. The vertical decorrelation lengthscale is set by `dz`
-/// [m].
+/// allowed value can be set by `dhmin` \[m\]. The vertical decorrelation lengthscale is set by `dz`
+/// \[m\].
 ///
 /// The background for the OI is computed by finding a suitable vertical profile of the
-/// observations in the outer circle. `dzmin` [m] sets the minimum elevation range required to
+/// observations in the outer circle. `dzmin` \[m\] sets the minimum elevation range required to
 /// compute a vertical profile.
 ///
 /// `num_iterations` specifies how many sweeps of all observations will be performed. Observations

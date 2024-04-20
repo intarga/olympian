@@ -4,7 +4,7 @@ use crate::{util, Error, Flag, SpatialCache};
 /// outliers.
 ///
 /// The check looks for buddies of an observation (at index i) in a neighbourhood specified by
-/// `radii[i]` [m], which is the radius of a circle around the observation to be checked. A minimum
+/// `radii[i]` \[m\], which is the radius of a circle around the observation to be checked. A minimum
 /// number of observations (`nums_min[i]`) is required to be available inside the circle and the
 /// range of elevations in the circle must not exceed `max_elev_diff` meters . The number of
 /// iterations is set by `num_iterations`.
