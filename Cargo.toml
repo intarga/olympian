@@ -13,5 +13,5 @@ categories = ["science::geo"]
 [dependencies]
 rstar = "0.12.0"
 faer = "0.18"
-thiserror = "1.0.58"
-chronoutil = "0.2.6"
+thiserror = "1.0.59"
+chronoutil = "0.2.7"
