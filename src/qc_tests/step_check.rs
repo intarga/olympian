@@ -21,6 +21,7 @@ pub fn step_check(data: &SeriesCache, high: f32, max: f32) -> Result<Vec<Flag>, 
         return Err(Error::InvalidInputShape("data".to_string()));
     }
 
+    // FIXME: this should also remove all the trailing points
     let trimmed = &data.values[leading_trim as usize..];
 
     let windows = trimmed.windows(2);
