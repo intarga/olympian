@@ -36,8 +36,8 @@ use thiserror::Error;
 
 mod qc_tests;
 pub use qc_tests::{
-    buddy_check::buddy_check, dip_check::dip_check, range_check::range_check, sct::sct,
-    step_check::step_check,
+    buddy_check::buddy_check, dip_check::dip_check, freeze_check::freeze_check,
+    range_check::range_check, sct::sct, step_check::step_check,
 };
 
 mod util;
