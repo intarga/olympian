@@ -2,6 +2,7 @@ pub(super) mod buddy_check;
 pub(super) mod dip_check;
 pub(super) mod freeze_check;
 pub(super) mod range_check;
+pub(super) mod range_check_wind_direction;
 pub(super) mod sct;
 pub(super) mod special_values_check;
 pub(super) mod step_check;
