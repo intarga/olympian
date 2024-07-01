@@ -130,7 +130,7 @@ pub(crate) fn calc_distance(lat1: f32, lon1: f32, lat2: f32, lon2: f32) -> Resul
 
     // floating point chaos was leading to this leaking outside the 0-1 range that's
     // valid for arccos, hence the enforcement
-    let norm_ratio = ratio.max(0.).min(1.);
+    let norm_ratio = ratio.clamp(0., 1.);
 
     Ok(norm_ratio.acos() * RADIUS_EARTH)
 }
