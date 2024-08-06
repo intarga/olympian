@@ -4,6 +4,7 @@ pub(super) mod cloud_consistency_check;
 pub(super) mod cloud_consistency_check2;
 pub(super) mod dip_check;
 pub(super) mod freeze_check;
+pub(super) mod lower_limit_special_value_pair;
 pub(super) mod range_check;
 pub(super) mod range_check_humidity;
 pub(super) mod range_check_pair;
