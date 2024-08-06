@@ -12,3 +12,4 @@ pub(super) mod range_check_wind_direction;
 pub(super) mod sct;
 pub(super) mod special_values_check;
 pub(super) mod step_check;
+pub(super) mod upper_limit_special_value_pair;
