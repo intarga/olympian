@@ -4,6 +4,7 @@ use crate::{Error, Flag};
 /// Consistency check between cloud parameters
 pub fn cloud_consistency_check(
     // TODO: check these types are correct. Might actually be int?
+    // TODO: avoid name shadowing?
     low_type_cloud: &[Option<f32>],
     medium_type_cloud: &[Option<f32>],
     cloud_base_height: &[Option<f32>],
