@@ -43,6 +43,7 @@ pub use qc_tests::{
     range_check::range_check, range_check_humidity::range_check_humidity,
     range_check_pair::range_check_pair, range_check_wind_direction::range_check_wind_direction,
     sct::sct, special_values_check::special_values_check, step_check::step_check,
+    upper_limit_special_value_pair::upper_limit_special_value_pair,
 };
 
 mod util;
