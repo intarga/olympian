@@ -41,7 +41,7 @@ pub use qc_tests::{
     flatline_check::{flatline_check, flatline_check_cache},
     range_check::{range_check, range_check_cache},
     range_check_humidity::{range_check_humidity, range_check_humidity_cache},
-    range_check_wind_direction::range_check_wind_direction,
+    range_check_wind_direction::{range_check_wind_direction, range_check_wind_direction_cache},
     sct::sct,
     special_values_check::{special_values_check, special_values_check_cache},
     spike_check::{spike_check, spike_check_cache, SPIKE_LEADING_PER_RUN, SPIKE_TRAILING_PER_RUN},
