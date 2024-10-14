@@ -5,6 +5,7 @@ use spatial_tree::SpatialTree;
 
 use crate::Error;
 use chronoutil::RelativeDuration;
+use std::ops::Index;
 
 /// Flag indicating result of a QC test for a given data point
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -89,6 +90,20 @@ impl DataCache {
             period,
             num_leading_points,
             num_trailing_points,
+        }
+    }
+}
+
+pub enum SingleOrVec<T> {
+    Single(T),
+    Vec(Vec<T>),
+}
+
+impl<T> SingleOrVec<T> {
+    pub(crate) fn index(&self, index: usize) -> &T {
+        match self {
+            SingleOrVec::Single(value) => value,
+            SingleOrVec::Vec(vec) => vec.index(index),
         }
     }
 }
