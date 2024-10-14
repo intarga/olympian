@@ -42,7 +42,7 @@ pub use qc_tests::{
     cloud_consistency_check2::cloud_consistency_check2,
     flatline_check::{flatline_check, flatline_check_cache},
     lower_limit_special_value_pair::lower_limit_special_value_pair,
-    range_check::range_check,
+    range_check::{range_check, range_check_cache},
     range_check_humidity::range_check_humidity,
     range_check_pair::range_check_pair,
     range_check_wind_direction::range_check_wind_direction,
