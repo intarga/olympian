@@ -40,7 +40,7 @@ pub use qc_tests::{
     buddy_check::buddy_check,
     cloud_consistency_check::cloud_consistency_check,
     cloud_consistency_check2::cloud_consistency_check2,
-    freeze_check::freeze_check,
+    flatline_check::{flatline_check, flatline_check_cache},
     lower_limit_special_value_pair::lower_limit_special_value_pair,
     range_check::range_check,
     range_check_humidity::range_check_humidity,
