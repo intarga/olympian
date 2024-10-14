@@ -47,9 +47,8 @@ pub use qc_tests::{
 };
 
 mod util;
+pub use util::DataCache;
 pub use util::Flag;
-pub use util::SeriesCache;
-pub use util::SpatialCache;
 
 /// Error type for Olympian
 #[derive(Error, Debug, Clone)]
