@@ -12,6 +12,9 @@ pub const SPIKE_TRAILING_PER_RUN: u8 = 1;
 /// - If the difference is less than 35% of the sum AND the sum is greater than `max`: Fail.
 /// - If the difference is less than 35% of the sum AND the sum is greater than `high`: Warn.
 /// - Else: Pass
+///
+/// Takes 3 datapoints, the second is the observation to be QCed, the first and third are needed
+/// to QC it.
 pub fn spike_check(data: &[Option<f32>; 3], max: f32) -> Flag {
     if data.contains(&None) {
         return Flag::DataMissing;
