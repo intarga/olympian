@@ -40,7 +40,7 @@ pub fn step_check_cache(
     max: f32,
 ) -> Result<Vec<(String, Vec<Flag>)>, Error> {
     let num_series = cache.data.len();
-    let mut result_vec = Vec::with_capacity(cache.data.len());
+    let mut result_vec = Vec::with_capacity(num_series);
     let series_len = match cache.data.first() {
         Some(ts) => ts.1.len(),
         // if this is none, the cache is empty, so we can just return an empty result vec
