@@ -37,7 +37,7 @@ pub fn range_check_humidity_cache(cache: &DataCache) -> Vec<(String, Vec<(Flag, 
         let windows = trimmed.iter();
 
         result_vec.push((
-            cache.data[i].0,
+            cache.data[i].0.clone(),
             windows.map(|datum| range_check_humidity(*datum)).collect(),
         ));
     }

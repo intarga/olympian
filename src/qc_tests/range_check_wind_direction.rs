@@ -48,7 +48,7 @@ pub fn range_check_wind_direction_cache(
         let windows = trimmed.iter();
 
         result_vec.push((
-            cache.data[i].0,
+            cache.data[i].0.clone(),
             windows
                 .map(|datum| range_check_wind_direction(*datum))
                 .collect(),
