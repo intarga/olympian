@@ -8,6 +8,9 @@ use crate::{
 };
 use faer::{solvers::SolverCore, Mat};
 
+/// Specific arguments to sct, broken into a struct to make the function
+/// signature more readable
+#[derive(Debug, Clone)]
 pub struct SctArgs {
     num_min: usize,
     num_max: usize,
@@ -509,6 +512,7 @@ pub fn sct(
     Ok(flags)
 }
 
+/// Apply [`sct`] to a whole [`DataCache`]
 pub fn sct_cache(
     cache: &DataCache,
     args: &SctArgs,
