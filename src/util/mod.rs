@@ -94,8 +94,12 @@ impl DataCache {
     }
 }
 
+/// A type that can represent either a vector, or a single value
+#[derive(Debug, Clone)]
 pub enum SingleOrVec<T> {
+    /// A single value
     Single(T),
+    /// A vector
     Vec(Vec<T>),
 }
 

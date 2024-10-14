@@ -1,5 +1,7 @@
 use crate::{DataCache, Error, Flag};
 
+/// Number of leading values a [`DataCache`] must contain to QC all its
+/// intended values with step check
 pub const STEP_LEADING_PER_RUN: u8 = 1;
 
 /// Timeseries QC test that compares each observation against its immediate predecessor.

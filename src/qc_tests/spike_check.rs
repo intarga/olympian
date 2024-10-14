@@ -1,6 +1,10 @@
 use crate::{DataCache, Error, Flag};
 
+/// Number of leading values a [`DataCache`] must contain to QC all its
+/// intended values with spike check
 pub const SPIKE_LEADING_PER_RUN: u8 = 1;
+/// Number of trailing values a [`DataCache`] must contain to QC all its
+/// intended values with spike check
 pub const SPIKE_TRAILING_PER_RUN: u8 = 1;
 
 /// Timeseries QC test that compares each observation against its immediate predecessor and

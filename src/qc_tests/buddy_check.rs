@@ -5,6 +5,7 @@ use crate::{
 
 /// Specific arguments to buddy_check, broken into a struct to make the function
 /// signature more readable
+#[derive(Debug, Clone)]
 pub struct BuddyCheckArgs {
     radii: Vec<f32>,
     nums_min: Vec<u32>,
