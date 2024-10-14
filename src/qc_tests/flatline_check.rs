@@ -60,7 +60,10 @@ pub fn flatline_check_cache(
 
         let windows = trimmed.windows(num_points as usize);
 
-        result_vec.push((cache.data[i].0, windows.map(flatline_check).collect()));
+        result_vec.push((
+            cache.data[i].0.clone(),
+            windows.map(flatline_check).collect(),
+        ));
     }
 
     Ok(result_vec)

@@ -34,11 +34,7 @@ pub fn step_check(data: &[Option<f32>; 2], max: f32) -> Flag {
 ///
 /// - data is invalid
 /// - data has `num_leading_points` <= 1
-pub fn step_check_cache(
-    cache: &DataCache,
-    high: f32,
-    max: f32,
-) -> Result<Vec<(String, Vec<Flag>)>, Error> {
+pub fn step_check_cache(cache: &DataCache, max: f32) -> Result<Vec<(String, Vec<Flag>)>, Error> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);
     let series_len = match cache.data.first() {
@@ -63,7 +59,7 @@ pub fn step_check_cache(
         let windows = trimmed.windows(1 + STEP_LEADING_PER_RUN as usize);
 
         result_vec.push((
-            cache.data[i].0,
+            cache.data[i].0.clone(),
             windows
                 .map(|data| step_check(data.try_into().unwrap(), max))
                 .collect(),

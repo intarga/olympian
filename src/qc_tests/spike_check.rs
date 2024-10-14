@@ -76,7 +76,7 @@ pub fn spike_check_cache(cache: &DataCache, max: f32) -> Result<Vec<(String, Vec
         let windows = trimmed.windows(3);
 
         result_vec.push((
-            cache.data[i].0,
+            cache.data[i].0.clone(),
             windows
                 .map(|data| spike_check(data.try_into().unwrap(), max))
                 .collect(),
