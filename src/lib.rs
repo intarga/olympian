@@ -36,13 +36,20 @@ use thiserror::Error;
 
 mod qc_tests;
 pub use qc_tests::{
-    aggregate_less_than_set::aggregate_less_than_set, buddy_check::buddy_check,
+    aggregate_less_than_set::aggregate_less_than_set,
+    buddy_check::buddy_check,
     cloud_consistency_check::cloud_consistency_check,
-    cloud_consistency_check2::cloud_consistency_check2, dip_check::dip_check,
-    freeze_check::freeze_check, lower_limit_special_value_pair::lower_limit_special_value_pair,
-    range_check::range_check, range_check_humidity::range_check_humidity,
-    range_check_pair::range_check_pair, range_check_wind_direction::range_check_wind_direction,
-    sct::sct, special_values_check::special_values_check, step_check::step_check,
+    cloud_consistency_check2::cloud_consistency_check2,
+    freeze_check::freeze_check,
+    lower_limit_special_value_pair::lower_limit_special_value_pair,
+    range_check::range_check,
+    range_check_humidity::range_check_humidity,
+    range_check_pair::range_check_pair,
+    range_check_wind_direction::range_check_wind_direction,
+    sct::sct,
+    special_values_check::special_values_check,
+    spike_check::{spike_check, spike_check_cache},
+    step_check::step_check,
     upper_limit_special_value_pair::upper_limit_special_value_pair,
 };
 
