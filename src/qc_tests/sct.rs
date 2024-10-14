@@ -576,15 +576,13 @@ mod tests {
         const N: usize = 10000;
         assert_eq!(
             sct(
-                &(0..N)
-                    .map(|i| Some(((i as f32).powi(2) * 0.001) % 1.))
-                    .collect::<Vec<Option<f32>>>(),
+                &vec![Some(1.); N],
                 &SpatialTree::from_latlons(
+                    (0..N).map(|i| ((i as f32).powi(2) * 0.001) % 1.).collect(),
                     (0..N)
                         .map(|i| ((i as f32 + 1.).powi(2) * 0.001) % 1.)
                         .collect(),
                     vec![1.; N],
-                    vec![1.; N]
                 ),
                 &SctArgs {
                     num_min: 5,

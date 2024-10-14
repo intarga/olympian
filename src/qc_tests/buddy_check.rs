@@ -209,8 +209,21 @@ mod tests {
     fn test_buddy_check() {
         assert_eq!(
             buddy_check(
-                &[Some(60.); BUDDY_N],
+                &[
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.1),
+                    Some(1.)
+                ]
+                .to_vec(),
                 &SpatialTree::from_latlons(
+                    [60.; BUDDY_N].to_vec(),
                     [
                         60.,
                         60.00011111,
@@ -225,7 +238,6 @@ mod tests {
                     ]
                     .to_vec(),
                     [0.; BUDDY_N].to_vec(),
-                    [0., 0., 0., 0., 0., 0., 0., 0., 0.1, 1.].to_vec()
                 ),
                 &BuddyCheckArgs {
                     radii: vec![10000.],
