@@ -37,7 +37,7 @@ use thiserror::Error;
 mod qc_tests;
 pub use qc_tests::{
     aggregate_less_than_set::aggregate_less_than_set,
-    buddy_check::buddy_check,
+    buddy_check::{buddy_check, buddy_check_cache, BuddyCheckArgs},
     flatline_check::{flatline_check, flatline_check_cache},
     range_check::{range_check, range_check_cache},
     range_check_humidity::{range_check_humidity, range_check_humidity_cache},
@@ -49,8 +49,7 @@ pub use qc_tests::{
 };
 
 mod util;
-pub use util::DataCache;
-pub use util::Flag;
+pub use util::{spatial_tree::SpatialTree, DataCache, Flag};
 
 /// Error type for Olympian
 #[derive(Error, Debug, Clone)]
