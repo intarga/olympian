@@ -1,19 +1,28 @@
 use crate::{
-    util::{self, spatial_tree::SpatialTree},
+    util::{self, spatial_tree::SpatialTree, SingleOrVec},
     DataCache, Error, Flag,
 };
 
 /// Specific arguments to buddy_check, broken into a struct to make the function
-/// signature more readable
+/// signature more readable.
 #[derive(Debug, Clone)]
 pub struct BuddyCheckArgs {
-    radii: Vec<f32>,
-    nums_min: Vec<u32>,
-    threshold: f32,
-    max_elev_diff: f32,
-    elev_gradient: f32,
-    min_std: f32,
-    num_iterations: u32,
+    /// Search radius in which buddies of an observation will be found. Unit: m
+    pub radii: SingleOrVec<f32>,
+    /// The minimum buddies an observation can have (lest it be flagged [`Flag::Isolated`])
+    pub nums_min: SingleOrVec<u32>,
+    /// The variance threshold for flagging a station. Unit: σ (standard deviations)
+    pub threshold: f32,
+    /// The maximum difference in elevation for a buddy (if negative will not check for height
+    /// difference). Unit: m
+    pub max_elev_diff: f32,
+    /// Linear elevation gradient with height. Unit: ou/m (ou = unit of observation)
+    pub elev_gradient: f32,
+    /// If the standard deviation of values in a neighborhood are less than min_std, min_std will
+    /// be used instead
+    pub min_std: f32,
+    /// The number of iterations of buddy_check to perform before returning
+    pub num_iterations: u32,
 }
 
 /// Spatial QC test that compares an observation against its neighbours (i.e buddies) and flags
@@ -44,22 +53,6 @@ pub struct BuddyCheckArgs {
 /// to check. The buddy check is performed only for values where the corresponding `obs_to_check`
 /// element is set to true, while all values are always used as buddies for checking the data
 /// quality.
-///
-/// ## Input parameters
-///
-/// | Parameter      | Unit | Description |
-/// | -------------- | ---- | ----------- |
-/// | data           | N/A  | See [`SpatialCache`] |
-/// | radii          | m    | Search radius |
-/// | nums_min       | N/A  | The minimum number of buddies a station can have |
-/// | threshold      | σ    | the variance threshold for flagging a station |
-/// | max_elev_diff  | m    | the maximum difference in elevation for a buddy (if negative will not check for heigh difference) |
-/// | elev_gradient  | ou/m | linear elevation gradient with height |
-/// | min_std        | N/A  | If the standard deviation of values in a neighborhood are less than min_std, min_std will be used instead |
-/// | num_iterations | N/A  | The number of iterations to perform |
-/// | obs_to_check*  | N/A  | Observations that will be checked. true=check the corresponding observation. Unchecked observations will be used to QC others, but will not be QCed themselves |
-///
-/// \* optional, ou = Unit of the observation, σ = Standard deviations
 pub fn buddy_check(
     data: &[Option<f32>],
     rtree: &SpatialTree,
@@ -86,28 +79,17 @@ pub fn buddy_check(
 
     for _iteration in 1..=args.num_iterations {
         for i in 0..data.len() {
-            let radius = if args.radii.len() == 1 {
-                args.radii[0]
-            } else {
-                args.radii[i]
-            };
-            let num_min = if args.nums_min.len() == 1 {
-                args.nums_min[0]
-            } else {
-                args.nums_min[i]
-            };
-
             if flags[i] != Flag::Pass {
                 continue;
             }
 
             if obs_to_check.map_or(true, |inner| inner[i]) {
                 let (lat, lon, elev) = rtree.get_coords_at_index(i);
-                let neighbours = rtree.get_neighbours(lat, lon, radius, false);
+                let neighbours = rtree.get_neighbours(lat, lon, *args.radii.index(i), false);
 
                 let mut list_buddies: Vec<f32> = Vec::new();
 
-                if neighbours.len() >= num_min as usize {
+                if neighbours.len() >= *args.nums_min.index(i) as usize {
                     for neighbour in neighbours {
                         let (_, _, neighbour_elev) = rtree.get_coords_at_index(neighbour.data);
 
@@ -133,7 +115,7 @@ pub fn buddy_check(
                     }
                 }
 
-                if list_buddies.len() >= num_min as usize {
+                if list_buddies.len() >= *args.nums_min.index(i) as usize {
                     let mean: f32 = list_buddies.iter().sum::<f32>() / list_buddies.len() as f32;
                     let variance: f32 = (list_buddies.iter().map(|x| x.powi(2)).sum::<f32>()
                         / list_buddies.len() as f32)
@@ -240,8 +222,8 @@ mod tests {
                     [0.; BUDDY_N].to_vec(),
                 ),
                 &BuddyCheckArgs {
-                    radii: vec![10000.],
-                    nums_min: vec![1],
+                    radii: SingleOrVec::Single(10000.),
+                    nums_min: SingleOrVec::Single(1),
                     threshold: 1.,
                     max_elev_diff: 200.,
                     elev_gradient: -0.0065,
