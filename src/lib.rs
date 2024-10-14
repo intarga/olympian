@@ -48,8 +48,8 @@ pub use qc_tests::{
     range_check_wind_direction::range_check_wind_direction,
     sct::sct,
     special_values_check::special_values_check,
-    spike_check::{spike_check, spike_check_cache},
-    step_check::step_check,
+    spike_check::{spike_check, spike_check_cache, SPIKE_LEADING_PER_RUN, SPIKE_TRAILING_PER_RUN},
+    step_check::{step_check, step_check_cache, STEP_LEADING_PER_RUN, STEP_TRAILING_PER_RUN},
     upper_limit_special_value_pair::upper_limit_special_value_pair,
 };
 
