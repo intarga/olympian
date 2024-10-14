@@ -5,23 +5,25 @@
 //! and spatial QC tests respectively.
 //!
 //! ```
-//! use olympian::{buddy_check, Flag, SpatialCache};
+//! use olympian::{buddy_check, Flag, SpatialTree, BuddyCheckArgs, SingleOrVec};
 //!
 //! assert_eq!(
 //!     buddy_check(
-//!         &SpatialCache::new(
+//!         &[Some(0.), Some(0.), Some(1.)],
+//!         &SpatialTree::from_latlons(
 //!             [60., 60., 60.].to_vec(),
 //!             [60., 60.00011111, 60.00022222].to_vec(),
 //!             [0., 0., 0.].to_vec(),
-//!             [0., 0., 1.].to_vec()
 //!         ),
-//!         &[10000.],
-//!         &[1],
-//!         1.,
-//!         200.,
-//!         -0.0065,
-//!         0.01,
-//!         2,
+//!         &BuddyCheckArgs {
+//!             radii: SingleOrVec::Single(10000.),
+//!             nums_min: SingleOrVec::Single(1),
+//!             threshold: 1.,
+//!             max_elev_diff: 200.,
+//!             elev_gradient: -0.0065,
+//!             min_std: 0.01,
+//!             num_iterations: 2,
+//!         },
 //!         None,
 //!     )
 //!     .unwrap(),

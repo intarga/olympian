@@ -9,21 +9,34 @@ use crate::{
 use faer::{solvers::SolverCore, Mat};
 
 /// Specific arguments to sct, broken into a struct to make the function
-/// signature more readable
+/// signature more readable.
 #[derive(Debug, Clone)]
 pub struct SctArgs {
-    num_min: usize,
-    num_max: usize,
-    inner_radius: f32,
-    outer_radius: f32,
-    num_iterations: u32,
-    num_min_prof: usize,
-    min_elev_diff: f32,
-    min_horizontal_scale: f32,
-    vertical_scale: f32,
-    pos: SingleOrVec<f32>,
-    neg: SingleOrVec<f32>,
-    eps2: SingleOrVec<f32>,
+    /// If an observation has fewer neighbours than this it will not be QCed.
+    pub num_min: usize,
+    /// A cap on the number of neighbours used to compute the expected value.
+    pub num_max: usize,
+    // FIXME: this doc comment can be improved
+    /// Radius in which OI will be reused. Unit: m
+    pub inner_radius: f32,
+    /// Radius for computing OI and background. Unit: m
+    pub outer_radius: f32,
+    /// The number of iterations of SCT to perform before returning.
+    pub num_iterations: u32,
+    /// Minimum number of observations to compute vertical profile.
+    pub num_min_prof: usize,
+    /// Minimum elevation difference to compute vertical profile. Unit: m
+    pub min_elev_diff: f32,
+    /// Minimum horizontal decorrelation length. Unit: m
+    pub min_horizontal_scale: f32,
+    /// Vertical decorrelation length. Unit: m
+    pub vertical_scale: f32,
+    /// Positive deviation allowed. Unit: σ (standard deviations)
+    pub pos: SingleOrVec<f32>,
+    /// Negative deviation allowed. Unit: σ (standard deviations)
+    pub neg: SingleOrVec<f32>,
+    /// Ratio of observation error variance to background variance.
+    pub eps2: SingleOrVec<f32>,
 }
 
 fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
@@ -194,19 +207,6 @@ fn remove_flagged<'a>(
 ///
 /// | Parameter            | Unit | Description |
 /// | -------------------- | ---- | ----------- |
-/// | data                 | N/A  | See [`SpatialCache`] |
-/// | num_min              | N/A  | If an observation has fewer neighbours than this it will not be QCed |
-/// | num_max              | N/A  | A cap on the number of neighbours used to compute the expected value |
-/// | inner_radius         | m    | Radius in which OI will be reused |
-/// | outer_radius         | m    | Radius for computing OI and background |
-/// | num_iterations       | N/A  | The number of iterations to perform |
-/// | num_min_prof         | N/A  | Minimum number of observations to compute vertical profile |
-/// | min_elev_diff        | m    | Minimum elevation difference to compute vertical profile |
-/// | min_horizontal_scale | m    | Minimum horizontal decorrelation length |
-/// | vertical_scale       | m    | Vertical decorrelation length |
-/// | pos                  | σ    | Positive deviation allowed |
-/// | neg                  | σ    | Negative deviation allowed |
-/// | eps2                 | N/A  | Ratio of observation error variance to background variance |
 /// | obs_to_check*        | N/A  | Observations that will be checked. true=check the corresponding observation. Unchecked observations will be used to QC others, but will not be QCed themselves |
 ///
 /// \* optional, ou = Unit of the observation, σ = Standard deviations
