@@ -16,7 +16,7 @@ pub fn range_check_wind_direction(datum: Option<f32>) -> (Flag, Option<f32>) {
     match datum {
         None => (Flag::DataMissing, None),
         Some(datum) => {
-            if datum > 380. || datum < -20. {
+            if !(-20. ..=380.).contains(&datum) {
                 return (Flag::Fail, None);
             } else if datum < 0. {
                 // TODO: is Warn the correct flag here?
@@ -29,7 +29,9 @@ pub fn range_check_wind_direction(datum: Option<f32>) -> (Flag, Option<f32>) {
     }
 }
 
+//TODO: is this the optimal return signature for corrections?
 /// Apply [`range_check_wind_direction`] to a whole [`DataCache`]
+#[allow(clippy::type_complexity)]
 pub fn range_check_wind_direction_cache(
     cache: &DataCache,
 ) -> Vec<(String, Vec<(Flag, Option<f32>)>)> {
