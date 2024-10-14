@@ -396,7 +396,7 @@ pub fn sct(
             let eps2_box = match &args.eps2 {
                 SingleOrVec::Single(eps2_value) => SingleOrVec::Single(*eps2_value),
                 SingleOrVec::Vec(eps2_vec) => {
-                    SingleOrVec::Vec(subset(&eps2_vec, &neighbour_indices))
+                    SingleOrVec::Vec(subset(eps2_vec, &neighbour_indices))
                 }
             };
 
