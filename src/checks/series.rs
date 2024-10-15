@@ -8,3 +8,6 @@ pub use spike_check::{
 
 mod step_check;
 pub use step_check::{step_check, step_check_cache, STEP_LEADING_PER_RUN};
+
+mod monotonic_increase_check;
+pub use monotonic_increase_check::monotonic_increase_check;
