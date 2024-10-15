@@ -5,7 +5,7 @@
 //! and spatial QC tests respectively.
 //!
 //! ```
-//! use olympian::{buddy_check, Flag, SpatialTree, BuddyCheckArgs, SingleOrVec};
+//! use olympian::{checks::spatial::{buddy_check, BuddyCheckArgs}, Flag, SpatialTree, SingleOrVec};
 //!
 //! assert_eq!(
 //!     buddy_check(
@@ -36,19 +36,8 @@
 
 use thiserror::Error;
 
-mod qc_tests;
-pub use qc_tests::{
-    aggregate_less_than_set::aggregate_less_than_set,
-    buddy_check::{buddy_check, buddy_check_cache, BuddyCheckArgs},
-    flatline_check::{flatline_check, flatline_check_cache},
-    range_check::{range_check, range_check_cache},
-    range_check_humidity::{range_check_humidity, range_check_humidity_cache},
-    range_check_wind_direction::{range_check_wind_direction, range_check_wind_direction_cache},
-    sct::{sct, sct_cache, SctArgs},
-    special_values_check::{special_values_check, special_values_check_cache},
-    spike_check::{spike_check, spike_check_cache, SPIKE_LEADING_PER_RUN, SPIKE_TRAILING_PER_RUN},
-    step_check::{step_check, step_check_cache, STEP_LEADING_PER_RUN},
-};
+/// Algorithms that can be used to QC meteorological data.
+pub mod checks;
 
 mod util;
 pub use util::{spatial_tree::SpatialTree, DataCache, Flag, SingleOrVec};
