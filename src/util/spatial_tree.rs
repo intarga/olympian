@@ -12,7 +12,7 @@ pub(crate) type SpatialPoint = GeomWithData<[f32; 3], usize>;
 ///
 /// This allows a data point's nearest neighbours to be found with ease
 #[derive(Debug, Clone)]
-pub(crate) struct SpatialTree {
+pub struct SpatialTree {
     pub(crate) tree: RTree<SpatialPoint>,
     pub(crate) lats: Vec<f32>,
     pub(crate) lons: Vec<f32>,
@@ -25,7 +25,7 @@ impl SpatialTree {
     /// The positions are specified by vectors of lats, lons, and elevs, where
     /// the elements from each vector at a given index together specify a
     /// single point in space
-    pub(crate) fn from_latlons(lats: Vec<f32>, lons: Vec<f32>, elevs: Vec<f32>) -> Self {
+    pub fn from_latlons(lats: Vec<f32>, lons: Vec<f32>, elevs: Vec<f32>) -> Self {
         //TODO: ensure vecs are the same size
 
         let raw_points: Vec<SpatialPoint> = lats
