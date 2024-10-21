@@ -70,3 +70,45 @@ pub fn step_check_cache(cache: &DataCache, max: f32) -> Result<Vec<(String, Vec<
 
     Ok(result_vec)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chronoutil::RelativeDuration;
+
+    #[test]
+    fn test_step_check_cache() {
+        assert_eq!(
+            step_check_cache(
+                &DataCache::new(
+                    vec![0., 1., 2., 3.],
+                    vec![0., 1., 2., 3.],
+                    vec![0., 0., 0., 0.],
+                    crate::util::Timestamp(0),
+                    RelativeDuration::minutes(10),
+                    1,
+                    1,
+                    vec![
+                        ("blindern1".to_string(), vec![Some(0.), Some(0.), None]),
+                        ("blindern2".to_string(), vec![Some(0.), Some(1.), Some(1.)]),
+                        (
+                            "blindern3".to_string(),
+                            vec![Some(0.), Some(-1.1), Some(1.)]
+                        ),
+                        ("blindern4".to_string(), vec![Some(1.), None, Some(1.)]),
+                        ("blindern5".to_string(), vec![None, Some(1.), Some(1.)]),
+                    ],
+                ),
+                1.,
+            )
+            .unwrap(),
+            vec![
+                ("blindern1".to_string(), vec![Flag::Pass]),
+                ("blindern2".to_string(), vec![Flag::Pass]),
+                ("blindern3".to_string(), vec![Flag::Fail]),
+                ("blindern4".to_string(), vec![Flag::DataMissing]),
+                ("blindern5".to_string(), vec![Flag::DataMissing]),
+            ]
+        )
+    }
+}

@@ -68,3 +68,40 @@ pub fn flatline_check_cache(
 
     Ok(result_vec)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chronoutil::RelativeDuration;
+
+    #[test]
+    fn test_flatline_check_cache() {
+        assert_eq!(
+            flatline_check_cache(
+                &DataCache::new(
+                    vec![0., 1., 2., 3.],
+                    vec![0., 1., 2., 3.],
+                    vec![0., 0., 0., 0.],
+                    crate::util::Timestamp(0),
+                    RelativeDuration::minutes(10),
+                    1,
+                    1,
+                    vec![
+                        ("blindern1".to_string(), vec![Some(0.), Some(1.), Some(1.)]),
+                        ("blindern2".to_string(), vec![Some(0.), Some(0.), None]),
+                        ("blindern3".to_string(), vec![Some(1.), None, Some(1.)]),
+                        ("blindern4".to_string(), vec![None, Some(1.), Some(1.)]),
+                    ],
+                ),
+                2,
+            )
+            .unwrap(),
+            vec![
+                ("blindern1".to_string(), vec![Flag::Pass]),
+                ("blindern2".to_string(), vec![Flag::Fail]),
+                ("blindern3".to_string(), vec![Flag::DataMissing]),
+                ("blindern4".to_string(), vec![Flag::DataMissing]),
+            ]
+        )
+    }
+}
