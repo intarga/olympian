@@ -30,3 +30,31 @@ pub fn monotonic_increase_check(data: &[Option<f32>; 25]) -> Flag {
 
 // TODO: implement monotonic_increase_check_cache?
 // should it break a datacache into sets of 25 using rolling windows, or chunks?
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::iter::repeat;
+
+    #[test]
+    fn test_monotonic_increase_check() {
+        let increasing_sequence: Vec<Option<f32>> = repeat(1.)
+            .take(25)
+            .enumerate()
+            .map(|(i, val)| Some(val + (i as f32 * 0.1)))
+            .collect();
+        let non_increasing_sequence = {
+            let mut s = increasing_sequence.clone();
+            s[10] = Some(s[10].unwrap() - 0.2);
+            s
+        };
+        assert_eq!(
+            monotonic_increase_check(&non_increasing_sequence.try_into().unwrap()),
+            Flag::Pass
+        );
+        assert_eq!(
+            monotonic_increase_check(&increasing_sequence.try_into().unwrap()),
+            Flag::Fail
+        );
+    }
+}
