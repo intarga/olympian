@@ -59,3 +59,39 @@ pub fn range_check_wind_direction_cache(
 
     result_vec
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chronoutil::RelativeDuration;
+
+    #[test]
+    fn test_range_check_wind_direction_cache() {
+        assert_eq!(
+            range_check_wind_direction_cache(&DataCache::new(
+                vec![0., 1., 2., 3.],
+                vec![0., 1., 2., 3.],
+                vec![0., 0., 0., 0.],
+                crate::util::Timestamp(0),
+                RelativeDuration::minutes(10),
+                1,
+                1,
+                vec![
+                    (
+                        "blindern1".to_string(),
+                        vec![Some(0.), Some(120.), Some(390.)]
+                    ),
+                    ("blindern2".to_string(), vec![Some(0.), Some(390.), None]),
+                    ("blindern3".to_string(), vec![Some(0.), Some(-5.), Some(1.)]),
+                    ("blindern4".to_string(), vec![Some(390.), None, Some(1.)]),
+                ],
+            ),),
+            vec![
+                ("blindern1".to_string(), vec![(Flag::Pass, None)]),
+                ("blindern2".to_string(), vec![(Flag::Fail, None)]),
+                ("blindern3".to_string(), vec![(Flag::Warn, Some(355.))]),
+                ("blindern4".to_string(), vec![(Flag::DataMissing, None)])
+            ]
+        )
+    }
+}

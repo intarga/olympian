@@ -1,10 +1,10 @@
 use crate::{DataCache, Flag};
 
-/// QC test that checks whether each observation fits within given limits.
+/// QC test that checks whether each observation fits within given (inclusive) limits.
 ///
 /// If the observation is missing, Flag::DataMissing with be returned, else if it is outside the
 /// upper or lower limits, Flag::Fail, else Flag::Pass.
-pub fn range_check(datum: Option<f32>, upper_limit: f32, lower_limit: f32) -> Flag {
+pub fn range_check(datum: Option<f32>, lower_limit: f32, upper_limit: f32) -> Flag {
     match datum {
         None => Flag::DataMissing,
         Some(datum) => {
@@ -45,4 +45,41 @@ pub fn range_check_cache(
     }
 
     result_vec
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chronoutil::RelativeDuration;
+
+    #[test]
+    fn test_range_check_cache() {
+        assert_eq!(
+            range_check_cache(
+                &DataCache::new(
+                    vec![0., 1., 2., 3.],
+                    vec![0., 1., 2., 3.],
+                    vec![0., 0., 0., 0.],
+                    crate::util::Timestamp(0),
+                    RelativeDuration::minutes(10),
+                    1,
+                    1,
+                    vec![
+                        ("blindern1".to_string(), vec![Some(0.), Some(0.), None]),
+                        ("blindern2".to_string(), vec![Some(0.), Some(1.), Some(1.)]),
+                        ("blindern3".to_string(), vec![Some(0.), Some(-1.), Some(1.)]),
+                        ("blindern4".to_string(), vec![Some(1.), None, Some(1.)]),
+                    ],
+                ),
+                0.,
+                0.5,
+            ),
+            vec![
+                ("blindern1".to_string(), vec![Flag::Pass]),
+                ("blindern2".to_string(), vec![Flag::Fail]),
+                ("blindern3".to_string(), vec![Flag::Fail]),
+                ("blindern4".to_string(), vec![Flag::DataMissing])
+            ]
+        )
+    }
 }

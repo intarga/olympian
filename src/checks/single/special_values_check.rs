@@ -45,3 +45,37 @@ pub fn special_values_check_cache(
 
     result_vec
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chronoutil::RelativeDuration;
+
+    #[test]
+    fn test_special_values_check_cache() {
+        assert_eq!(
+            special_values_check_cache(
+                &DataCache::new(
+                    vec![0., 1., 2.],
+                    vec![0., 1., 2.],
+                    vec![0., 0., 0.],
+                    crate::util::Timestamp(0),
+                    RelativeDuration::minutes(10),
+                    1,
+                    1,
+                    vec![
+                        ("blindern1".to_string(), vec![Some(0.), Some(0.), None]),
+                        ("blindern2".to_string(), vec![Some(0.), Some(1.), Some(1.)]),
+                        ("blindern3".to_string(), vec![Some(1.), None, Some(1.)]),
+                    ],
+                ),
+                &vec![1., 2.]
+            ),
+            vec![
+                ("blindern1".to_string(), vec![Flag::Pass]),
+                ("blindern2".to_string(), vec![Flag::Fail]),
+                ("blindern3".to_string(), vec![Flag::DataMissing])
+            ]
+        )
+    }
+}
