@@ -5,6 +5,7 @@ use spatial_tree::SpatialTree;
 
 use crate::Error;
 use chronoutil::RelativeDuration;
+use std::ops::Index;
 
 /// Flag indicating result of a QC test for a given data point
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -36,58 +37,78 @@ pub enum Flag {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Timestamp(pub i64);
 
-/// Container of series data
-#[derive(Debug, Clone, PartialEq)]
-pub struct SeriesCache {
+/// Container for metereological data
+///
+/// a [`new`](DataCache::new) method is provided to
+/// avoid the need to construct an R*-tree manually
+#[derive(Debug, Clone)]
+pub struct DataCache {
+    /// Vector of timeseries.
+    ///
+    /// Each inner vector represents a timeseries, tagged with a string
+    /// identifier, with its data points in chronological order.
+    /// All these timeseries are aligned on start_time and period.
+    /// `None`s represent gaps in the series.
+    pub data: Vec<(String, Vec<Option<f32>>)>,
     /// Time of the first observation in data
     pub start_time: Timestamp,
     /// Period of the timeseries, i.e. the time gap between successive elements
     pub period: RelativeDuration,
-    /// Data points of the timeseries in chronological order
-    ///
-    /// `None`s represent gaps in the series
-    pub values: Vec<Option<f32>>,
+    /// an [R*-tree](https://en.wikipedia.org/wiki/R*-tree) used to spatially
+    /// index the data
+    pub rtree: SpatialTree,
     /// The number of extra points in the series before the data to be QCed
     ///
     /// These points are needed because certain timeseries tests need more
-    /// context around points to be able to QC them.
+    /// context around points to be able to QC them. The scheduler looks at
+    /// the list of requested tests to figure out how many leading points will
+    /// be needed, and requests a SeriesCache from the DataSwitch with that
+    /// number of leading points
     pub num_leading_points: u8,
     /// The number of extra points in the series after the data to be QCed
-    ///
-    /// These points are needed because certain timeseries tests need more
-    /// context around points to be able to QC them.
     pub num_trailing_points: u8,
 }
 
-/// Container of spatial data
-///
-/// This contains the values of the data along with an [R*-tree](https://en.wikipedia.org/wiki/R*-tree)
-/// used to spatially index them. A [`new`](SpatialCache::new) method is provided to avoid the
-/// need to construct an R*-tree manually, instead users need only provide the latitude, longitude
-/// (in degrees), and elevation (in meters) for each value.
-#[derive(Debug, Clone)]
-pub struct SpatialCache {
-    /// an [R*-tree](https://en.wikipedia.org/wiki/R*-tree) used to spatially
-    /// index the data
-    pub(crate) rtree: SpatialTree,
-    /// Data points in the spatial slice
-    pub values: Vec<f32>,
-}
-
-impl SpatialCache {
-    /// Create a new SpatialCache without manually constructing the R*-tree
-    pub fn new(lats: Vec<f32>, lons: Vec<f32>, elevs: Vec<f32>, values: Vec<f32>) -> Self {
+#[allow(clippy::too_many_arguments)]
+impl DataCache {
+    /// Create a new DataCache without manually constructing the R*-tree
+    pub fn new(
+        lats: Vec<f32>,
+        lons: Vec<f32>,
+        elevs: Vec<f32>,
+        start_time: Timestamp,
+        period: RelativeDuration,
+        num_leading_points: u8,
+        num_trailing_points: u8,
+        data: Vec<(String, Vec<Option<f32>>)>,
+    ) -> Self {
         // TODO: ensure vecs have same size
         Self {
             rtree: SpatialTree::from_latlons(lats, lons, elevs),
-            values,
+            data,
+            start_time,
+            period,
+            num_leading_points,
+            num_trailing_points,
         }
     }
+}
 
-    // TODO: rename to values?
-    /// Get a reference to the values held inside the SpatialCache
-    pub fn data(&self) -> &Vec<f32> {
-        &self.values
+/// A type that can represent either a vector, or a single value
+#[derive(Debug, Clone)]
+pub enum SingleOrVec<T> {
+    /// A single value
+    Single(T),
+    /// A vector
+    Vec(Vec<T>),
+}
+
+impl<T> SingleOrVec<T> {
+    pub(crate) fn index(&self, index: usize) -> &T {
+        match self {
+            SingleOrVec::Single(value) => value,
+            SingleOrVec::Vec(vec) => vec.index(index),
+        }
     }
 }
 

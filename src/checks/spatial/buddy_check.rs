@@ -1,4 +1,29 @@
-use crate::{util, Error, Flag, SpatialCache};
+use crate::{
+    util::{self, spatial_tree::SpatialTree, SingleOrVec},
+    DataCache, Error, Flag,
+};
+
+/// Specific arguments to buddy_check, broken into a struct to make the function
+/// signature more readable.
+#[derive(Debug, Clone)]
+pub struct BuddyCheckArgs {
+    /// Search radius in which buddies of an observation will be found. Unit: m
+    pub radii: SingleOrVec<f32>,
+    /// The minimum buddies an observation can have (lest it be flagged [`Flag::Isolated`])
+    pub nums_min: SingleOrVec<u32>,
+    /// The variance threshold for flagging a station. Unit: σ (standard deviations)
+    pub threshold: f32,
+    /// The maximum difference in elevation for a buddy (if negative will not check for height
+    /// difference). Unit: m
+    pub max_elev_diff: f32,
+    /// Linear elevation gradient with height. Unit: ou/m (ou = unit of observation)
+    pub elev_gradient: f32,
+    /// If the standard deviation of values in a neighborhood are less than min_std, min_std will
+    /// be used instead
+    pub min_std: f32,
+    /// The number of iterations of buddy_check to perform before returning
+    pub num_iterations: u32,
+}
 
 /// Spatial QC test that compares an observation against its neighbours (i.e buddies) and flags
 /// outliers.
@@ -28,93 +53,69 @@ use crate::{util, Error, Flag, SpatialCache};
 /// to check. The buddy check is performed only for values where the corresponding `obs_to_check`
 /// element is set to true, while all values are always used as buddies for checking the data
 /// quality.
-///
-/// ## Input parameters
-///
-/// | Parameter      | Unit | Description |
-/// | -------------- | ---- | ----------- |
-/// | data           | N/A  | See [`SpatialCache`] |
-/// | radii          | m    | Search radius |
-/// | nums_min       | N/A  | The minimum number of buddies a station can have |
-/// | threshold      | σ    | the variance threshold for flagging a station |
-/// | max_elev_diff  | m    | the maximum difference in elevation for a buddy (if negative will not check for heigh difference) |
-/// | elev_gradient  | ou/m | linear elevation gradient with height |
-/// | min_std        | N/A  | If the standard deviation of values in a neighborhood are less than min_std, min_std will be used instead |
-/// | num_iterations | N/A  | The number of iterations to perform |
-/// | obs_to_check*  | N/A  | Observations that will be checked. true=check the corresponding observation. Unchecked observations will be used to QC others, but will not be QCed themselves |
-///
-/// \* optional, ou = Unit of the observation, σ = Standard deviations
-#[allow(clippy::too_many_arguments)]
 pub fn buddy_check(
-    data: &SpatialCache,
-    radii: &[f32],
-    nums_min: &[u32],
-    threshold: f32,
-    max_elev_diff: f32,
-    elev_gradient: f32,
-    min_std: f32,
-    num_iterations: u32,
+    data: &[Option<f32>],
+    rtree: &SpatialTree,
+    args: &BuddyCheckArgs,
     obs_to_check: Option<&[bool]>,
 ) -> Result<Vec<Flag>, Error> {
     // TODO: Check input vectors are properly sized
 
     let mut flags: Vec<Flag> = data
-        .values
         .iter()
-        .map(|v| {
-            if util::is_valid(*v) {
-                Flag::Pass
-            } else {
-                Flag::Fail
+        .map(|opt| match opt {
+            Some(value) => {
+                if util::is_valid(*value) {
+                    Flag::Pass
+                } else {
+                    Flag::Fail
+                }
             }
+            None => Flag::DataMissing,
         })
         .collect();
 
     let mut num_removed_last_iteration = 0;
 
-    for _iteration in 1..=num_iterations {
-        for i in 0..data.values.len() {
-            let radius = if radii.len() == 1 { radii[0] } else { radii[i] };
-            let num_min = if nums_min.len() == 1 {
-                nums_min[0]
-            } else {
-                nums_min[i]
-            };
-
+    for _iteration in 1..=args.num_iterations {
+        for i in 0..data.len() {
             if flags[i] != Flag::Pass {
                 continue;
             }
 
             if obs_to_check.map_or(true, |inner| inner[i]) {
-                let (lat, lon, elev) = data.rtree.get_coords_at_index(i);
-                let neighbours = data.rtree.get_neighbours(lat, lon, radius, false);
+                let (lat, lon, elev) = rtree.get_coords_at_index(i);
+                let neighbours = rtree.get_neighbours(lat, lon, *args.radii.index(i), false);
 
                 let mut list_buddies: Vec<f32> = Vec::new();
 
-                if neighbours.len() >= num_min as usize {
+                if neighbours.len() >= *args.nums_min.index(i) as usize {
                     for neighbour in neighbours {
-                        let (_, _, neighbour_elev) = data.rtree.get_coords_at_index(neighbour.data);
+                        let (_, _, neighbour_elev) = rtree.get_coords_at_index(neighbour.data);
 
                         if flags[neighbour.data] != Flag::Pass {
                             continue;
                         }
 
-                        if max_elev_diff > 0.0 {
+                        if args.max_elev_diff > 0.0 {
                             let elev_diff = elev - neighbour_elev;
 
-                            if elev_diff.abs() <= max_elev_diff {
+                            if elev_diff.abs() <= args.max_elev_diff {
                                 let adjusted_value =
-                                    data.values[neighbour.data] + (elev_diff * elev_gradient);
+                                    // safe to unwrap because if this was none, we would have `continue;`d
+                                    // when checking the flags
+                                    data[neighbour.data].unwrap() + (elev_diff * args.elev_gradient);
 
                                 list_buddies.push(adjusted_value);
                             }
                         } else {
-                            list_buddies.push(data.values[neighbour.data]);
+                            // same here
+                            list_buddies.push(data[neighbour.data].unwrap());
                         }
                     }
                 }
 
-                if list_buddies.len() >= num_min as usize {
+                if list_buddies.len() >= *args.nums_min.index(i) as usize {
                     let mean: f32 = list_buddies.iter().sum::<f32>() / list_buddies.len() as f32;
                     let variance: f32 = (list_buddies.iter().map(|x| x.powi(2)).sum::<f32>()
                         / list_buddies.len() as f32)
@@ -126,11 +127,12 @@ pub fn buddy_check(
                                         // }
                     let std_adjusted = std::cmp::max_by(
                         (variance + variance / list_buddies.len() as f32).sqrt(),
-                        min_std,
+                        args.min_std,
                         |x, y| x.partial_cmp(y).unwrap_or(std::cmp::Ordering::Equal),
                     );
 
-                    if (data.values[i] - mean).abs() / std_adjusted > threshold {
+                    // and same here
+                    if (data[i].unwrap() - mean).abs() / std_adjusted > args.threshold {
                         flags[i] = Flag::Fail;
                     }
                 }
@@ -152,6 +154,34 @@ pub fn buddy_check(
     Ok(flags)
 }
 
+/// Apply [`buddy_check`] to a whole [`DataCache`]
+pub fn buddy_check_cache(
+    cache: &DataCache,
+    args: &BuddyCheckArgs,
+    // TODO: should we allow different obs_to_check for each timeslice?
+    obs_to_check: Option<&[bool]>,
+) -> Result<Vec<(String, Vec<Flag>)>, Error> {
+    let series_len = cache.data[0].1.len();
+
+    let mut result_vec: Vec<(String, Vec<Flag>)> = cache
+        .data
+        .iter()
+        .map(|ts| (ts.0.clone(), Vec::with_capacity(series_len)))
+        .collect();
+
+    for i in (cache.num_leading_points as usize)..(series_len - cache.num_trailing_points as usize)
+    {
+        let timeslice: Vec<Option<f32>> = cache.data.iter().map(|v| v.1[i]).collect();
+        let spatial_result = buddy_check(&timeslice, &cache.rtree, args, obs_to_check)?;
+
+        for i in 0..spatial_result.len() {
+            result_vec[i].1.push(spatial_result[i]);
+        }
+    }
+
+    Ok(result_vec)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -161,7 +191,20 @@ mod tests {
     fn test_buddy_check() {
         assert_eq!(
             buddy_check(
-                &SpatialCache::new(
+                &[
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.),
+                    Some(0.1),
+                    Some(1.)
+                ]
+                .to_vec(),
+                &SpatialTree::from_latlons(
                     [60.; BUDDY_N].to_vec(),
                     [
                         60.,
@@ -177,15 +220,16 @@ mod tests {
                     ]
                     .to_vec(),
                     [0.; BUDDY_N].to_vec(),
-                    [0., 0., 0., 0., 0., 0., 0., 0., 0.1, 1.].to_vec()
                 ),
-                &[10000.],
-                &[1],
-                1.,
-                200.,
-                -0.0065,
-                0.01,
-                2,
+                &BuddyCheckArgs {
+                    radii: SingleOrVec::Single(10000.),
+                    nums_min: SingleOrVec::Single(1),
+                    threshold: 1.,
+                    max_elev_diff: 200.,
+                    elev_gradient: -0.0065,
+                    min_std: 0.01,
+                    num_iterations: 2,
+                },
                 None,
             )
             .unwrap(),
