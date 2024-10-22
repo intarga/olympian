@@ -18,3 +18,15 @@ pub fn greater_than(datum1: Option<f32>, datum2: Option<f32>, datum1_correction:
         Flag::Pass
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_greater_than() {
+        assert_eq!(greater_than(Some(1.), Some(1.), 0.2), Flag::Fail);
+        assert_eq!(greater_than(Some(1.), Some(1.5), 0.2), Flag::Pass);
+        assert_eq!(greater_than(Some(1.), None, 0.2), Flag::DataMissing);
+    }
+}
