@@ -1,6 +1,6 @@
 use crate::{DataCache, Error, Flag};
 
-/// Timeseries QC test that checks for streaks of repeating values.
+/// Timeseries check that looks for streaks of repeating values.
 ///
 /// If all observations passed in are identical, [`Flag::Fail`] will be returned, if any are
 /// missing, [`Flag::DataMissing`], if `data` is empty, [`Flag::Invalid`], else [`Flag::Pass`].
