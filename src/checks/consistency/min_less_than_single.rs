@@ -63,19 +63,19 @@ mod tests {
     #[test]
     fn test_min_less_than_single() {
         assert_eq!(
-            min_less_than_single(Some(1.), &vec![Some(1.), Some(2.), Some(2.)], 0.2),
+            min_less_than_single(Some(1.), &[Some(1.), Some(2.), Some(2.)], 0.2),
             Flag::Pass
         );
         assert_eq!(
-            min_less_than_single(Some(1.), &vec![Some(1.), Some(2.), Some(2.)], -0.2),
+            min_less_than_single(Some(1.), &[Some(1.), Some(2.), Some(2.)], -0.2),
             Flag::Fail
         );
         assert_eq!(
-            min_less_than_single(Some(1.), &vec![Some(1.), None, Some(2.)], -0.2),
+            min_less_than_single(Some(1.), &[Some(1.), None, Some(2.)], -0.2),
             Flag::Fail
         );
         assert_eq!(
-            min_less_than_single(Some(1.), &vec![Some(1.), None, Some(2.)], 0.2),
+            min_less_than_single(Some(1.), &[Some(1.), None, Some(2.)], 0.2),
             Flag::DataMissing
         );
     }

@@ -63,19 +63,19 @@ mod tests {
     #[test]
     fn test_max_less_than_single() {
         assert_eq!(
-            max_less_than_single(Some(1.), &vec![Some(1.), Some(0.), Some(0.)], 0.2),
+            max_less_than_single(Some(1.), &[Some(1.), Some(0.), Some(0.)], 0.2),
             Flag::Pass
         );
         assert_eq!(
-            max_less_than_single(Some(1.), &vec![Some(1.), Some(0.), Some(0.)], -0.2),
+            max_less_than_single(Some(1.), &[Some(1.), Some(0.), Some(0.)], -0.2),
             Flag::Fail
         );
         assert_eq!(
-            max_less_than_single(Some(1.), &vec![Some(1.), None, Some(0.)], -0.2),
+            max_less_than_single(Some(1.), &[Some(1.), None, Some(0.)], -0.2),
             Flag::Fail
         );
         assert_eq!(
-            max_less_than_single(Some(1.), &vec![Some(1.), None, Some(0.)], 0.2),
+            max_less_than_single(Some(1.), &[Some(1.), None, Some(0.)], 0.2),
             Flag::DataMissing
         );
     }

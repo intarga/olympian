@@ -69,7 +69,7 @@ mod tests {
                         ("blindern3".to_string(), vec![Some(1.), None, Some(1.)]),
                     ],
                 ),
-                &vec![1., 2.]
+                &[1., 2.]
             ),
             vec![
                 ("blindern1".to_string(), vec![Flag::Pass]),
