@@ -10,7 +10,7 @@ pub struct BuddyCheckArgs {
     /// Search radius in which buddies of an observation will be found. Unit: m
     pub radii: SingleOrVec<f32>,
     /// The minimum buddies an observation can have (lest it be flagged [`Flag::Isolated`])
-    pub nums_min: SingleOrVec<u32>,
+    pub min_buddies: SingleOrVec<u32>,
     /// The variance threshold for flagging a station. Unit: σ (standard deviations)
     pub threshold: f32,
     /// The maximum difference in elevation for a buddy (if negative will not check for height
@@ -30,7 +30,7 @@ pub struct BuddyCheckArgs {
 ///
 /// The check looks for buddies of an observation (at index i) in a neighbourhood specified by
 /// `radii[i]` \[m\], which is the radius of a circle around the observation to be checked. A minimum
-/// number of observations (`nums_min[i]`) is required to be available inside the circle and the
+/// number of observations (`min_buddies[i]`) is required to be available inside the circle and the
 /// range of elevations in the circle must not exceed `max_elev_diff` meters . The number of
 /// iterations is set by `num_iterations`.
 ///
@@ -89,7 +89,7 @@ pub fn buddy_check(
 
                 let mut list_buddies: Vec<f32> = Vec::new();
 
-                if neighbours.len() >= *args.nums_min.index(i) as usize {
+                if neighbours.len() >= *args.min_buddies.index(i) as usize {
                     for neighbour in neighbours {
                         let (_, _, neighbour_elev) = rtree.get_coords_at_index(neighbour.data);
 
@@ -115,7 +115,7 @@ pub fn buddy_check(
                     }
                 }
 
-                if list_buddies.len() >= *args.nums_min.index(i) as usize {
+                if list_buddies.len() >= *args.min_buddies.index(i) as usize {
                     let mean: f32 = list_buddies.iter().sum::<f32>() / list_buddies.len() as f32;
                     let variance: f32 = (list_buddies.iter().map(|x| x.powi(2)).sum::<f32>()
                         / list_buddies.len() as f32)
@@ -217,7 +217,7 @@ mod tests {
                 ),
                 &BuddyCheckArgs {
                     radii: SingleOrVec::Single(10000.),
-                    nums_min: SingleOrVec::Single(1),
+                    min_buddies: SingleOrVec::Single(1),
                     threshold: 1.,
                     max_elev_diff: 200.,
                     elev_gradient: -0.0065,

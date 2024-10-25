@@ -17,7 +17,7 @@
 //!         ),
 //!         &BuddyCheckArgs {
 //!             radii: SingleOrVec::Single(10000.),
-//!             nums_min: SingleOrVec::Single(1),
+//!             min_buddies: SingleOrVec::Single(1),
 //!             threshold: 1.,
 //!             max_elev_diff: 200.,
 //!             elev_gradient: -0.0065,
