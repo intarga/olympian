@@ -1,4 +1,4 @@
-use crate::{DataCache, Error, Flag};
+use crate::{util::Timeseries, DataCache, Error, Flag};
 
 /// Timeseries check that looks for streaks of repeating values.
 ///
@@ -37,11 +37,11 @@ pub fn flatline_check(data: &[Option<f32>]) -> Flag {
 pub fn flatline_check_cache(
     cache: &DataCache,
     num_points: u8,
-) -> Result<Vec<(String, Vec<Flag>)>, Error> {
+) -> Result<Vec<Timeseries<Flag>>, Error> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(cache.data.len());
     let series_len = match cache.data.first() {
-        Some(ts) => ts.1.len(),
+        Some(ts) => ts.values.len(),
         // if this is none, the cache is empty, so we can just return an empty result vec
         None => return Ok(result_vec),
     };
@@ -56,15 +56,15 @@ pub fn flatline_check_cache(
     }
 
     for i in 0..num_series {
-        let trimmed = &cache.data[i].1
+        let trimmed = &cache.data[i].values
             [leading_trim as usize..(series_len - cache.num_trailing_points as usize)];
 
         let windows = trimmed.windows(num_points as usize);
 
-        result_vec.push((
-            cache.data[i].0.clone(),
-            windows.map(flatline_check).collect(),
-        ));
+        result_vec.push(Timeseries {
+            tag: cache.data[i].tag.clone(),
+            values: windows.map(flatline_check).collect(),
+        });
     }
 
     Ok(result_vec)
@@ -80,6 +80,24 @@ mod tests {
         assert_eq!(
             flatline_check_cache(
                 &DataCache::new(
+                    vec![
+                        Timeseries {
+                            tag: "blindern1".to_string(),
+                            values: vec![Some(0.), Some(1.), Some(1.)]
+                        },
+                        Timeseries {
+                            tag: "blindern2".to_string(),
+                            values: vec![Some(0.), Some(0.), None]
+                        },
+                        Timeseries {
+                            tag: "blindern3".to_string(),
+                            values: vec![Some(1.), None, Some(1.)]
+                        },
+                        Timeseries {
+                            tag: "blindern4".to_string(),
+                            values: vec![None, Some(1.), Some(1.)]
+                        },
+                    ],
                     vec![0., 1., 2., 3.],
                     vec![0., 1., 2., 3.],
                     vec![0., 0., 0., 0.],
@@ -87,21 +105,27 @@ mod tests {
                     RelativeDuration::minutes(10),
                     1,
                     1,
-                    vec![
-                        ("blindern1".to_string(), vec![Some(0.), Some(1.), Some(1.)]),
-                        ("blindern2".to_string(), vec![Some(0.), Some(0.), None]),
-                        ("blindern3".to_string(), vec![Some(1.), None, Some(1.)]),
-                        ("blindern4".to_string(), vec![None, Some(1.), Some(1.)]),
-                    ],
                 ),
                 2,
             )
             .unwrap(),
             vec![
-                ("blindern1".to_string(), vec![Flag::Pass]),
-                ("blindern2".to_string(), vec![Flag::Fail]),
-                ("blindern3".to_string(), vec![Flag::DataMissing]),
-                ("blindern4".to_string(), vec![Flag::DataMissing]),
+                Timeseries {
+                    tag: "blindern1".to_string(),
+                    values: vec![Flag::Pass]
+                },
+                Timeseries {
+                    tag: "blindern2".to_string(),
+                    values: vec![Flag::Fail]
+                },
+                Timeseries {
+                    tag: "blindern3".to_string(),
+                    values: vec![Flag::DataMissing]
+                },
+                Timeseries {
+                    tag: "blindern4".to_string(),
+                    values: vec![Flag::DataMissing]
+                },
             ]
         )
     }

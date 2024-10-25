@@ -2,7 +2,7 @@ use crate::{
     util::{
         self,
         spatial_tree::{SpatialPoint, SpatialTree},
-        SingleOrVec,
+        SingleOrVec, Timeseries,
     },
     DataCache, Error, Flag,
 };
@@ -517,22 +517,25 @@ pub fn sct_cache(
     cache: &DataCache,
     args: &SctArgs,
     obs_to_check: Option<&[bool]>,
-) -> Result<Vec<(String, Vec<Flag>)>, Error> {
-    let series_len = cache.data[0].1.len();
+) -> Result<Vec<Timeseries<Flag>>, Error> {
+    let series_len = cache.data[0].values.len();
 
-    let mut result_vec: Vec<(String, Vec<Flag>)> = cache
+    let mut result_vec: Vec<Timeseries<Flag>> = cache
         .data
         .iter()
-        .map(|ts| (ts.0.clone(), Vec::with_capacity(series_len)))
+        .map(|ts| Timeseries {
+            tag: ts.tag.clone(),
+            values: Vec::with_capacity(series_len),
+        })
         .collect();
 
     for i in (cache.num_leading_points as usize)..(series_len - cache.num_trailing_points as usize)
     {
-        let timeslice: Vec<Option<f32>> = cache.data.iter().map(|v| v.1[i]).collect();
+        let timeslice: Vec<Option<f32>> = cache.data.iter().map(|ts| ts.values[i]).collect();
         let spatial_result = sct(&timeslice, &cache.rtree, args, obs_to_check)?;
 
         for i in 0..spatial_result.len() {
-            result_vec[i].1.push(spatial_result[i]);
+            result_vec[i].values.push(spatial_result[i]);
         }
     }
 
