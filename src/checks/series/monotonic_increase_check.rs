@@ -43,18 +43,19 @@ mod tests {
             .enumerate()
             .map(|(i, val)| Some(val + (i as f32 * 0.1)))
             .collect();
+        assert_eq!(
+            monotonic_increase_check(&increasing_sequence.clone().try_into().unwrap()),
+            Flag::Fail
+        );
+
         let non_increasing_sequence = {
-            let mut s = increasing_sequence.clone();
+            let mut s = increasing_sequence;
             s[10] = Some(s[10].unwrap() - 0.2);
             s
         };
         assert_eq!(
             monotonic_increase_check(&non_increasing_sequence.try_into().unwrap()),
             Flag::Pass
-        );
-        assert_eq!(
-            monotonic_increase_check(&increasing_sequence.try_into().unwrap()),
-            Flag::Fail
         );
     }
 }
