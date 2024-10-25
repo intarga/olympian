@@ -15,9 +15,8 @@ pub fn step_check(data: &[Option<f32>; 2], max: f32) -> Flag {
     if data.contains(&None) {
         return Flag::DataMissing;
     }
-    let data: Vec<f32> = data.iter().map(|opt| opt.unwrap()).collect();
 
-    if (data[0] - data[1]).abs() > max {
+    if (data[0].unwrap() - data[1].unwrap()).abs() > max {
         return Flag::Fail;
     }
     Flag::Pass

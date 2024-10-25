@@ -8,13 +8,12 @@ pub fn flatline_check(data: &[Option<f32>]) -> Flag {
     if data.contains(&None) {
         return Flag::DataMissing;
     }
-    let data: Vec<f32> = data.iter().map(|opt| opt.unwrap()).collect();
 
     let base = match data.first() {
         Some(base) => base,
         None => return Flag::Invalid,
     };
-    if !data.iter().any(|x| x != base) {
+    if !data.iter().any(|x| x.unwrap() != base.unwrap()) {
         return Flag::Fail;
     }
     Flag::Pass
