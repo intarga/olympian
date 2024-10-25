@@ -2,8 +2,11 @@ use crate::{DataCache, Flag};
 
 /// Range check with a correction for humidity over 100%.
 ///
-/// Humidity less than 5% or greater than 105% returns Flag::Fail, between 100% and 105% it is,
-/// corrected down to 100%.
+/// Returns:
+/// - ([`Flag::DataMissing`], None) if the observation is missing,
+/// - ([`Flag::Fail`], None) if humidity less than 5% or greater than 105%,
+/// - ([`Flag::Warn`], Some(100.)) between 100% and 105%,
+/// - ([`Flag::Pass`], None) otherwise.
 pub fn range_check_humidity(datum: Option<f32>) -> (Flag, Option<f32>) {
     match datum {
         None => (Flag::DataMissing, None),

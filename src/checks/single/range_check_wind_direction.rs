@@ -2,8 +2,12 @@ use crate::{DataCache, Flag};
 
 /// Range check with a correction for wind direction outside 0-360.
 ///
-/// If the direction is -20-0, or 360-380, 360 will be added or subtracted to get it back into
-/// the correct range.
+/// Returns:
+/// - ([`Flag::DataMissing`], None) if the observation is missing,
+/// - ([`Flag::Fail`], None) if the value is less than -20 or greater than 380,
+/// - ([`Flag::Warn`], Some(value + 360)) if the value is between -20 and 0,
+/// - ([`Flag::Warn`], Some(value - 360)) if the value is between 360 and 380,
+/// - ([`Flag::Pass`], None) otherwise.
 pub fn range_check_wind_direction(datum: Option<f32>) -> (Flag, Option<f32>) {
     // TODO: get to the bottom of weird -3.0 handling: kvalobs code looks for a value -3.0, and
     // avoids flagging that if X_5 (lowest?) is also -3.0. From comments in the code, it looks like
