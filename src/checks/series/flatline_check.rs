@@ -2,12 +2,17 @@ use crate::{util::Timeseries, DataCache, Error, Flag};
 
 /// Timeseries check that looks for streaks of repeating values.
 ///
+/// `threshold` defines the amount that values can differ while still being considered "equal".
+/// Even if you are only using this check to find values you expect to exactly the same, it is
+/// still useful to give some consideration to threshold here, due to possible noise introduced
+/// to floats in transport between systems.
+///
 /// Returns:
 /// - [`Flag::DataMissing`] if any observations are missing,
 /// - [`Flag::Invalid`] if `data` is empty,
 /// - [`Flag::Fail`] if all observations passed in are identical,
 /// - [`Flag::Pass`] otherwise.
-pub fn flatline_check(data: &[Option<f32>]) -> Flag {
+pub fn flatline_check(data: &[Option<f32>], threshold: f32) -> Flag {
     if data.contains(&None) {
         return Flag::DataMissing;
     }
@@ -16,7 +21,10 @@ pub fn flatline_check(data: &[Option<f32>]) -> Flag {
         Some(base) => base,
         None => return Flag::Invalid,
     };
-    if !data.iter().any(|x| x.unwrap() != base.unwrap()) {
+    if !data
+        .iter()
+        .any(|x| (x.unwrap() - base.unwrap()).abs() > threshold)
+    {
         return Flag::Fail;
     }
     Flag::Pass
@@ -37,6 +45,7 @@ pub fn flatline_check(data: &[Option<f32>]) -> Flag {
 pub fn flatline_check_cache(
     cache: &DataCache,
     num_points: u8,
+    threshold: f32,
 ) -> Result<Vec<Timeseries<Flag>>, Error> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(cache.data.len());
@@ -63,7 +72,7 @@ pub fn flatline_check_cache(
 
         result_vec.push(Timeseries {
             tag: cache.data[i].tag.clone(),
-            values: windows.map(flatline_check).collect(),
+            values: windows.map(|x| flatline_check(x, threshold)).collect(),
         });
     }
 
@@ -107,6 +116,7 @@ mod tests {
                     1,
                 ),
                 2,
+                0.0001
             )
             .unwrap(),
             vec![
