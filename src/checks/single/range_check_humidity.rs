@@ -1,4 +1,4 @@
-use crate::{DataCache, Flag};
+use crate::{util::Timeseries, DataCache, Flag};
 
 /// Range check with a correction for humidity over 100%.
 ///
@@ -25,25 +25,25 @@ pub fn range_check_humidity(datum: Option<f32>) -> (Flag, Option<f32>) {
 //TODO: is this the optimal return signature for corrections?
 /// Apply [`range_check_humidity`] to a whole [`DataCache`]
 #[allow(clippy::type_complexity)]
-pub fn range_check_humidity_cache(cache: &DataCache) -> Vec<(String, Vec<(Flag, Option<f32>)>)> {
+pub fn range_check_humidity_cache(cache: &DataCache) -> Vec<Timeseries<(Flag, Option<f32>)>> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);
     let series_len = match cache.data.first() {
-        Some(ts) => ts.1.len(),
+        Some(ts) => ts.values.len(),
         // if this is none, the cache is empty, so we can just return an empty result vec
         None => return result_vec,
     };
 
     for i in 0..num_series {
-        let trimmed = &cache.data[i].1
+        let trimmed = &cache.data[i].values
             [cache.num_leading_points as usize..(series_len - cache.num_trailing_points as usize)];
 
         let windows = trimmed.iter();
 
-        result_vec.push((
-            cache.data[i].0.clone(),
-            windows.map(|datum| range_check_humidity(*datum)).collect(),
-        ));
+        result_vec.push(Timeseries {
+            tag: cache.data[i].tag.clone(),
+            values: windows.map(|datum| range_check_humidity(*datum)).collect(),
+        });
     }
 
     result_vec
@@ -58,6 +58,24 @@ mod tests {
     fn test_range_check_humidity_cache() {
         assert_eq!(
             range_check_humidity_cache(&DataCache::new(
+                vec![
+                    Timeseries {
+                        tag: "blindern1".to_string(),
+                        values: vec![Some(0.), Some(50.), Some(1.)]
+                    },
+                    Timeseries {
+                        tag: "blindern2".to_string(),
+                        values: vec![Some(0.), Some(3.), None]
+                    },
+                    Timeseries {
+                        tag: "blindern3".to_string(),
+                        values: vec![Some(0.), Some(103.), Some(1.)]
+                    },
+                    Timeseries {
+                        tag: "blindern4".to_string(),
+                        values: vec![Some(1.), None, Some(1.)]
+                    },
+                ],
                 vec![0., 1., 2., 3.],
                 vec![0., 1., 2., 3.],
                 vec![0., 0., 0., 0.],
@@ -65,21 +83,24 @@ mod tests {
                 RelativeDuration::minutes(10),
                 1,
                 1,
-                vec![
-                    ("blindern1".to_string(), vec![Some(0.), Some(50.), Some(1.)]),
-                    ("blindern2".to_string(), vec![Some(0.), Some(3.), None]),
-                    (
-                        "blindern3".to_string(),
-                        vec![Some(0.), Some(103.), Some(1.)]
-                    ),
-                    ("blindern4".to_string(), vec![Some(1.), None, Some(1.)]),
-                ],
             ),),
             vec![
-                ("blindern1".to_string(), vec![(Flag::Pass, None)]),
-                ("blindern2".to_string(), vec![(Flag::Fail, None)]),
-                ("blindern3".to_string(), vec![(Flag::Warn, Some(100.))]),
-                ("blindern4".to_string(), vec![(Flag::DataMissing, None)])
+                Timeseries {
+                    tag: "blindern1".to_string(),
+                    values: vec![(Flag::Pass, None)]
+                },
+                Timeseries {
+                    tag: "blindern2".to_string(),
+                    values: vec![(Flag::Fail, None)]
+                },
+                Timeseries {
+                    tag: "blindern3".to_string(),
+                    values: vec![(Flag::Warn, Some(100.))]
+                },
+                Timeseries {
+                    tag: "blindern4".to_string(),
+                    values: vec![(Flag::DataMissing, None)]
+                }
             ]
         )
     }

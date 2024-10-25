@@ -1,4 +1,4 @@
-use crate::{DataCache, Error, Flag};
+use crate::{util::Timeseries, DataCache, Error, Flag};
 
 /// Number of leading values a [`DataCache`] must contain to QC all its
 /// intended values with step check
@@ -33,11 +33,11 @@ pub fn step_check(data: &[Option<f32>; 2], max: f32) -> Flag {
 ///
 /// - data is invalid
 /// - data has `num_leading_points` <= 1
-pub fn step_check_cache(cache: &DataCache, max: f32) -> Result<Vec<(String, Vec<Flag>)>, Error> {
+pub fn step_check_cache(cache: &DataCache, max: f32) -> Result<Vec<Timeseries<Flag>>, Error> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);
     let series_len = match cache.data.first() {
-        Some(ts) => ts.1.len(),
+        Some(ts) => ts.values.len(),
         // if this is none, the cache is empty, so we can just return an empty result vec
         None => return Ok(result_vec),
     };
@@ -52,17 +52,17 @@ pub fn step_check_cache(cache: &DataCache, max: f32) -> Result<Vec<(String, Vec<
     }
 
     for i in 0..num_series {
-        let trimmed = &cache.data[i].1
+        let trimmed = &cache.data[i].values
             [leading_trim as usize..(series_len - cache.num_trailing_points as usize)];
 
         let windows = trimmed.windows(1 + STEP_LEADING_PER_RUN as usize);
 
-        result_vec.push((
-            cache.data[i].0.clone(),
-            windows
+        result_vec.push(Timeseries {
+            tag: cache.data[i].tag.clone(),
+            values: windows
                 .map(|data| step_check(data.try_into().unwrap(), max))
                 .collect(),
-        ))
+        })
     }
 
     Ok(result_vec)
@@ -78,6 +78,28 @@ mod tests {
         assert_eq!(
             step_check_cache(
                 &DataCache::new(
+                    vec![
+                        Timeseries {
+                            tag: "blindern1".to_string(),
+                            values: vec![Some(0.), Some(0.), None]
+                        },
+                        Timeseries {
+                            tag: "blindern2".to_string(),
+                            values: vec![Some(0.), Some(1.), Some(1.)]
+                        },
+                        Timeseries {
+                            tag: "blindern3".to_string(),
+                            values: vec![Some(0.), Some(-1.1), Some(1.)]
+                        },
+                        Timeseries {
+                            tag: "blindern4".to_string(),
+                            values: vec![Some(1.), None, Some(1.)]
+                        },
+                        Timeseries {
+                            tag: "blindern5".to_string(),
+                            values: vec![None, Some(1.), Some(1.)]
+                        },
+                    ],
                     vec![0., 1., 2., 3.],
                     vec![0., 1., 2., 3.],
                     vec![0., 0., 0., 0.],
@@ -85,26 +107,31 @@ mod tests {
                     RelativeDuration::minutes(10),
                     1,
                     1,
-                    vec![
-                        ("blindern1".to_string(), vec![Some(0.), Some(0.), None]),
-                        ("blindern2".to_string(), vec![Some(0.), Some(1.), Some(1.)]),
-                        (
-                            "blindern3".to_string(),
-                            vec![Some(0.), Some(-1.1), Some(1.)]
-                        ),
-                        ("blindern4".to_string(), vec![Some(1.), None, Some(1.)]),
-                        ("blindern5".to_string(), vec![None, Some(1.), Some(1.)]),
-                    ],
                 ),
                 1.,
             )
             .unwrap(),
             vec![
-                ("blindern1".to_string(), vec![Flag::Pass]),
-                ("blindern2".to_string(), vec![Flag::Pass]),
-                ("blindern3".to_string(), vec![Flag::Fail]),
-                ("blindern4".to_string(), vec![Flag::DataMissing]),
-                ("blindern5".to_string(), vec![Flag::DataMissing]),
+                Timeseries {
+                    tag: "blindern1".to_string(),
+                    values: vec![Flag::Pass]
+                },
+                Timeseries {
+                    tag: "blindern2".to_string(),
+                    values: vec![Flag::Pass]
+                },
+                Timeseries {
+                    tag: "blindern3".to_string(),
+                    values: vec![Flag::Fail]
+                },
+                Timeseries {
+                    tag: "blindern4".to_string(),
+                    values: vec![Flag::DataMissing]
+                },
+                Timeseries {
+                    tag: "blindern5".to_string(),
+                    values: vec![Flag::DataMissing]
+                },
             ]
         )
     }

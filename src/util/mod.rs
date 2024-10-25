@@ -37,25 +37,33 @@ pub enum Flag {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Timestamp(pub i64);
 
+/// A series of values representing a slice of a timeseries, tagged with an identifier of the
+/// timeseries they are from.
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct Timeseries<T> {
+    /// String tag identifying the timeseries.
+    pub tag: String,
+    /// Data values in the timeseries.
+    pub values: Vec<T>,
+}
+
 /// Container for metereological data
 ///
 /// a [`new`](DataCache::new) method is provided to
 /// avoid the need to construct an R*-tree manually
 #[derive(Debug, Clone)]
 pub struct DataCache {
-    /// Vector of timeseries.
+    /// Vector of [`Timeseries`].
     ///
-    /// Each inner vector represents a timeseries, tagged with a string
-    /// identifier, with its data points in chronological order.
-    /// All these timeseries are aligned on start_time and period.
+    /// All of these timeseries are aligned on start_time and period.
     /// `None`s represent gaps in the series.
     ///
     /// Each timeseries vector can be represented as follows:
     /// |---|----------|---|
     /// where the first and last sections are `DataCache.num_leading_points` and
     /// `DataCache.num_trailing_points` long, respectively.
-    /// The actual observations to be QCed (i.e. flagged) lie in the middle section.#[derive(Debug, Clone)]
-    pub data: Vec<(String, Vec<Option<f32>>)>,
+    /// The actual observations to be QCed (i.e. flagged) lie in the middle section.
+    pub data: Vec<Timeseries<Option<f32>>>,
     /// Time of the first observation in data
     ///
     /// This means the first observation that will actually be QCed, so excluding the "leading"
@@ -82,6 +90,7 @@ pub struct DataCache {
 impl DataCache {
     /// Create a new DataCache without manually constructing the R*-tree
     pub fn new(
+        data: Vec<Timeseries<Option<f32>>>,
         lats: Vec<f32>,
         lons: Vec<f32>,
         elevs: Vec<f32>,
@@ -89,7 +98,6 @@ impl DataCache {
         period: RelativeDuration,
         num_leading_points: u8,
         num_trailing_points: u8,
-        data: Vec<(String, Vec<Option<f32>>)>,
     ) -> Self {
         // TODO: ensure vecs have same size
         Self {
