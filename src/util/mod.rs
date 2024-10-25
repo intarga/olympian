@@ -49,8 +49,17 @@ pub struct DataCache {
     /// identifier, with its data points in chronological order.
     /// All these timeseries are aligned on start_time and period.
     /// `None`s represent gaps in the series.
+    ///
+    /// Each timeseries vector can be represented as follows:
+    /// |---|----------|---|
+    /// where the first and last sections are `DataCache.num_leading_points` and
+    /// `DataCache.num_trailing_points` long, respectively.
+    /// The actual observations to be QCed (i.e. flagged) lie in the middle section.#[derive(Debug, Clone)]
     pub data: Vec<(String, Vec<Option<f32>>)>,
     /// Time of the first observation in data
+    ///
+    /// This means the first observation that will actually be QCed, so excluding the "leading"
+    /// points.
     pub start_time: Timestamp,
     /// Period of the timeseries, i.e. the time gap between successive elements
     pub period: RelativeDuration,
