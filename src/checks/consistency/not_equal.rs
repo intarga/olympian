@@ -6,9 +6,10 @@ use crate::Flag;
 /// Useful for comparing observations against model data, or comparing two instruments measuring
 /// the same climate parameter at the same site.
 ///
-/// Returns [`Flag::DataMissing`] if either datum is missing,
-/// [`Flag::Fail`] if the difference between datum1 and datum2 is greater than threshold,
-/// [`Flag::Pass`] otherwise.
+/// Returns:
+/// - [`Flag::DataMissing`] if either datum is missing,
+/// - [`Flag::Fail`] if the difference between datum1 and datum2 is greater than threshold,
+/// - [`Flag::Pass`] otherwise.
 pub fn not_equal(datum1: Option<f32>, datum2: Option<f32>, threshold: f32) -> Flag {
     if datum1.is_none() || datum2.is_none() {
         return Flag::DataMissing;

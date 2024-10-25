@@ -3,11 +3,13 @@ use crate::Flag;
 /// Compares a single value to a higher resolution sequence, where the maximum value in the
 /// sequence (including an adjustment) should never be greater than the single value
 ///
-/// If this invariant is broken (i.e the maximum of the sequence, plus the adjustment, is greater
-/// than the single value), we return [`Flag::Fail`].
-/// Else, if any of the elements is missing, we return [`Flag::DataMissing`], as we cannot be sure
-/// a missing data point did not violate the invariant.
-/// Else we return [`Flag::Pass`].
+/// Returns:
+/// - [`Flag::DataMissing`] if the single value is missing,
+/// - [`Flag::Fail`] if this invariant is broken (i.e the maximum of the sequence, plus the
+///   adjustment, is greater than the single value),
+/// - [`Flag::DataMissing`] if any of the elements is missing, as we cannot be sure a missing data
+///   point did not violate the invariant.
+/// - [`Flag::Pass`] otherwise.
 pub fn max_greater_than_single(
     single: Option<f32>,
     sequence: &[Option<f32>],
