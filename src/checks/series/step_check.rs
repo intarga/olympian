@@ -6,11 +6,13 @@ pub const STEP_LEADING_PER_RUN: u8 = 1;
 
 /// Timeseries QC test that compares each observation against its immediate predecessor.
 ///
-/// If the absolute value of the difference between the observed value and it's predecessor is
-/// greater than max, Flag::Fail will be returned for that observation, if greater than high,
-/// Flag::Warn, if either value if missing, Flag::DataMissing, else Flag::Pass.
-///
 /// Takes 2 datapoints, the second is the observation to be QCed, the first is needed to QC it.
+///
+/// Returns:
+/// - [`Flag::DataMissing`] if either value is missing,
+/// - [`Flag::Fail`] If the absolute value of the difference between the observed value and it's
+///   predecessor is greater than max
+/// - [`Flag::Pass`] otherwise.
 pub fn step_check(data: &[Option<f32>; 2], max: f32) -> Flag {
     if data.contains(&None) {
         return Flag::DataMissing;
@@ -24,12 +26,8 @@ pub fn step_check(data: &[Option<f32>; 2], max: f32) -> Flag {
 
 /// Apply [`step_check`] to a whole [`DataCache`]
 ///
-/// As a predecessor to each observation is needed, the [`SeriesCache`] provided must have
+/// As a predecessor to each observation is needed, the [`DataCache`] provided must have
 /// `num_leading_points` >= 1.
-///
-/// As a predecessor and successor to each observation are needed, the [`SeriesCache`] provided
-/// must have `num_leading_points` and `num_trailing_points` >= 1. A constant is provided to aid
-/// in enforcing this constraint
 ///
 /// ## Errors
 ///

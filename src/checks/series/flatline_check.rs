@@ -2,8 +2,11 @@ use crate::{DataCache, Error, Flag};
 
 /// Timeseries check that looks for streaks of repeating values.
 ///
-/// If all observations passed in are identical, [`Flag::Fail`] will be returned, if any are
-/// missing, [`Flag::DataMissing`], if `data` is empty, [`Flag::Invalid`], else [`Flag::Pass`].
+/// Returns:
+/// - [`Flag::DataMissing`] if any observations are missing,
+/// - [`Flag::Invalid`] if `data` is empty,
+/// - [`Flag::Fail`] if all observations passed in are identical,
+/// - [`Flag::Pass`] otherwise.
 pub fn flatline_check(data: &[Option<f32>]) -> Flag {
     if data.contains(&None) {
         return Flag::DataMissing;
@@ -21,9 +24,8 @@ pub fn flatline_check(data: &[Option<f32>]) -> Flag {
 
 /// Apply [`flatline_check`] to a whole [`DataCache`]
 ///
-/// If `num_points` observations in a row are identical, the last will be flagged as Flag::Fail, if
-/// any of the last `num_points` observations are missing, it will be flagged as Flag::DataMissing,
-/// else Flag::Pass.
+/// `num_points` is the size of rolling windows passed into flatline_check, i.e. how many
+/// observations in a row need to be identical to result in a [`Flag::Fail`].
 ///
 /// As (`num_points` - 1) predecessors to each observation are needed, the [`SeriesCache`] provided must have
 /// `num_leading_points` >= `num_points` - 1.

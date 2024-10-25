@@ -7,18 +7,20 @@ pub const SPIKE_LEADING_PER_RUN: u8 = 1;
 /// intended values with spike check
 pub const SPIKE_TRAILING_PER_RUN: u8 = 1;
 
-/// Timeseries QC test that compares each observation against its immediate predecessor and
+/// Timeseries check that compares each observation against its immediate predecessor and
 /// successor.
-///
-/// The sum and difference of the differences between the observation and each of its neighbours
-/// is computed. the observation will be flagged as follows
-/// - If values are missing for the observation or either neighbour: DataMissing.
-/// - If the difference is less than 35% of the sum AND the sum is greater than `max`: Fail.
-/// - If the difference is less than 35% of the sum AND the sum is greater than `high`: Warn.
-/// - Else: Pass
 ///
 /// Takes 3 datapoints, the second is the observation to be QCed, the first and third are needed
 /// to QC it.
+///
+/// The sum and difference of the differences between the observation and each of its neighbours
+/// is computed.
+///
+/// Returns:
+/// - [`Flag::DataMissing`] if values are missing for the observation or either neighbour,
+/// - [`Flag::Fail`] if the difference (explained above) is less than 35% of the sum AND the sum
+///   (explained above) is greater than `max`,
+/// - [`Flag::Pass`] otherwise.
 pub fn spike_check(data: &[Option<f32>; 3], max: f32) -> Flag {
     if data.contains(&None) {
         return Flag::DataMissing;
@@ -38,7 +40,7 @@ pub fn spike_check(data: &[Option<f32>; 3], max: f32) -> Flag {
 
 /// Apply [`spike_check`] to a whole [`DataCache`]
 ///
-/// As a predecessor and successor to each observation are needed, the [`SeriesCache`] provided
+/// As a predecessor and successor to each observation are needed, the [`DataCache`] provided
 /// must have `num_leading_points` and `num_trailing_points` >= 1. Constants are provided to aid
 /// in enforcing this constraint
 ///
