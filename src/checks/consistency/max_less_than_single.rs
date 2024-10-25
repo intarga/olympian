@@ -37,7 +37,7 @@ pub fn max_less_than_single(
         });
     let max = match max {
         Some(value) => value,
-        // if min is None at this point, then all the elements of the sequence were missing...
+        // if max is None at this point, then all the elements of the sequence were missing...
         None => {
             // so we can't perform the check
             return Flag::DataMissing;
