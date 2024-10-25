@@ -1,9 +1,11 @@
 use crate::{DataCache, Flag};
 
-/// QC test that checks whether each observation fits within given (inclusive) limits.
+/// Single check of whether an observation fits within given (inclusive) limits.
 ///
-/// If the observation is missing, Flag::DataMissing with be returned, else if it is outside the
-/// upper or lower limits, Flag::Fail, else Flag::Pass.
+/// Returns:
+/// - [`Flag::DataMissing`] if the observation is missing,
+/// - [`Flag::Fail`] if it is outside the upper or lower limits,
+/// - [`Flag::Pass`] otherwise.
 pub fn range_check(datum: Option<f32>, lower_limit: f32, upper_limit: f32) -> Flag {
     match datum {
         None => Flag::DataMissing,

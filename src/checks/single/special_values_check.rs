@@ -1,9 +1,11 @@
 use crate::{DataCache, Flag};
 
-/// QC test that checks whether each observation matches some special values.
+/// Single check of whether an observation matches some special values.
 ///
-/// If the observation is missing, Flag::DataMissing with be returned, else if it is matches any of
-/// the special values, Flag::Fail, else Flag::Pass.
+/// Returns:
+/// - [`Flag::DataMissing`] if the observation is missing,
+/// - [`Flag::Fail`] if it matches any of the special values
+/// - [`Flag::Pass`] otherwise.
 pub fn special_values_check(datum: Option<f32>, special_values: &[f32]) -> Flag {
     match datum {
         None => Flag::DataMissing,
