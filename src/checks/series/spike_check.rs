@@ -23,11 +23,11 @@ pub fn spike_check(data: &[Option<f32>; 3], max: f32) -> Flag {
     if data.contains(&None) {
         return Flag::DataMissing;
     }
-    let data: Vec<f32> = data.iter().map(|opt| opt.unwrap()).collect();
+    let (left, obs, right) = (data[0].unwrap(), data[1].unwrap(), data[2].unwrap());
 
-    if (data[2] < data[1] && data[0] < data[1]) || (data[2] > data[1] && data[0] > data[1]) {
-        let diffsum = ((data[2] - data[1]).abs() + (data[1] - data[0]).abs()).abs();
-        let diffdiff = ((data[2] - data[1]).abs() - (data[1] - data[0]).abs()).abs();
+    if (right < obs && left < obs) || (right > obs && left > obs) {
+        let diffsum = ((right - obs).abs() + (obs - left).abs()).abs();
+        let diffdiff = ((right - obs).abs() - (obs - left).abs()).abs();
 
         if diffdiff < (diffsum * 0.35) && diffsum > max {
             return Flag::Fail;
