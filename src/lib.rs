@@ -40,7 +40,7 @@ use thiserror::Error;
 pub mod checks;
 
 mod util;
-pub use util::{spatial_tree::SpatialTree, DataCache, Flag, SingleOrVec, Timeseries};
+pub use util::{spatial_tree::SpatialTree, DataCache, Flag, SingleOrVec, Timeseries, Timestamp};
 
 /// Error type for Olympian
 #[derive(Error, Debug, Clone)]
