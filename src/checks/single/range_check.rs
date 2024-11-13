@@ -21,8 +21,8 @@ pub fn range_check(datum: Option<f32>, lower_limit: f32, upper_limit: f32) -> Fl
 /// Apply [`range_check`] to a whole [`DataCache`]
 pub fn range_check_cache(
     cache: &DataCache,
-    upper_limit: f32,
     lower_limit: f32,
+    upper_limit: f32,
 ) -> Vec<Timeseries<Flag>> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);
@@ -41,7 +41,7 @@ pub fn range_check_cache(
         result_vec.push(Timeseries {
             tag: cache.data[i].tag.clone(),
             values: windows
-                .map(|datum| range_check(*datum, upper_limit, lower_limit))
+                .map(|datum| range_check(*datum, lower_limit, upper_limit))
                 .collect(),
         });
     }
