@@ -4,7 +4,7 @@ use crate::{util::Timeseries, DataCache, Error, Flag};
 /// intended values with step check
 pub const STEP_LEADING_PER_RUN: u8 = 1;
 
-/// Timeseries QC test that compares each observation against its immediate predecessor.
+/// Timeseries check that compares each observation against its immediate predecessor.
 ///
 /// Takes 2 datapoints, the second is the observation to be QCed, the first is needed to QC it.
 ///
@@ -32,7 +32,7 @@ pub fn step_check(data: &[Option<f32>; 2], max: f32) -> Flag {
 /// ## Errors
 ///
 /// - data is invalid
-/// - data has `num_leading_points` <= 1
+/// - data has `num_leading_points` < 1
 pub fn step_check_cache(cache: &DataCache, max: f32) -> Result<Vec<Timeseries<Flag>>, Error> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);
