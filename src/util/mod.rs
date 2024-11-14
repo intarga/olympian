@@ -111,6 +111,51 @@ impl DataCache {
     }
 }
 
+/// Alignment between each pair of timeseries in a [`ConsistencyCache`]
+#[derive(Debug, Clone)]
+pub enum ConsistencyAlignment {
+    /// Perfect alignment, the timeseries are the same length and each element of the first
+    /// matches exactly one in the second
+    OneToOne,
+    /// The second timeseries is longer, and each element in the first timeseries is cotemporal
+    /// with the first element of a group in the second
+    Start,
+    /// The second timeseries is longer, and each element in the first timeseries is cotemporal
+    /// with the center element of a group in the second. In the case where the group is of even
+    /// length, then the later of the two center elements is taken to be the center
+    Center,
+    /// The second timeseries is longer, and each element in the first timeseries is cotemporal
+    /// with the last element of a group in the second
+    End,
+}
+
+/// Similar to [`DataCache`] but for use with consistency checks.
+///
+/// As consistency checks typically compare two timeseries of different parameters (and perhaps
+/// different periods), the data field here contains a vector of pairs of timeseries which are
+/// passed together into consistency checks.
+#[derive(Debug, Clone)]
+pub struct ConsistencyCache {
+    /// Vector of pairs of [`Timeseries`].
+    ///
+    /// Each pair of timeseries are aligned with the other pairs on start_time and period
+    /// `None`s represent gaps in the series.
+    #[allow(clippy::type_complexity)]
+    pub data: Vec<(Timeseries<Option<f32>>, Timeseries<Option<f32>>)>,
+    /// Time of the first observation in the timeseries
+    ///
+    /// the first timestamp applies to the first timeseries in each pair, and so for the second
+    pub start_time: (Timestamp, Timestamp),
+    /// Period of the timeseries, i.e. the time gap between successive elements
+    ///
+    /// the first period applies to the first timeseries in each pair, and so for the second
+    pub period: (RelativeDuration, RelativeDuration),
+    /// Alignment between the two timeseries in each pair.
+    ///
+    /// See [`ConsistencyAlignment`] for more info on the meaning of each variant
+    pub alignment: ConsistencyAlignment,
+}
+
 /// A type that can represent either a vector, or a single value
 #[derive(Debug, Clone)]
 pub enum SingleOrVec<T> {
