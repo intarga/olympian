@@ -1,0 +1,91 @@
+use crate::Flag;
+
+/// Compares a single value to a higher resolution sequence, where the single value should never
+/// be greater than any value in the sequence (including an adjustment)
+///
+/// Returns:
+/// For the single value:
+/// - [`Flag::DataMissing`] if the single value is missing,
+/// - [`Flag::Fail`] if this invariant is broken (i.e the single value is greater than the any element
+///   of the sequence plus the adjustment),
+/// - [`Flag::DataMissing`] if any of the elements is missing, as we cannot be sure a missing data
+///   point did not violate the invariant.
+/// - [`Flag::Pass`] otherwise.
+///
+/// For each element in the sequence:
+/// - [`Flag::DataMissing`] if the single value or the element is missing,
+/// - [`Flag::Fail`] if this invariant is broken (i.e the single value is greater than the element
+///   plus the adjustment),
+/// - [`Flag::Pass`] otherwise.
+pub fn single_greater_than_any(
+    single: Option<f32>,
+    sequence: &[Option<f32>],
+    adjustment: f32,
+) -> (Flag, Vec<Flag>) {
+    let single = match single {
+        Some(value) => value,
+        None => {
+            // If the single is missing, we can't do a check at all
+            return (Flag::DataMissing, vec![Flag::DataMissing; sequence.len()]);
+        }
+    };
+
+    let sequence_flags: Vec<Flag> = sequence
+        .iter()
+        // for each element of the sequence
+        .map(|elem| match elem {
+            Some(value) => {
+                if single > value + adjustment {
+                    // if the value violates the invariant, flag it as Fail
+                    Flag::Fail
+                } else {
+                    Flag::Pass
+                }
+            }
+            // if the value is missing, flag as DataMissing
+            None => Flag::DataMissing,
+        })
+        .collect();
+
+    let single_flag = if sequence_flags.iter().any(|f| *f == Flag::Fail) {
+        // if the invariant was violated for any element of the sequence, it was for the single
+        // value too
+        Flag::Fail
+    } else if sequence_flags.iter().any(|f| *f == Flag::DataMissing) {
+        // else if no violation was detected, but there was missing data in the sequence, we cannot
+        // say for sure that the invariant wasn't invalidated
+        Flag::DataMissing
+    } else {
+        Flag::Pass
+    };
+
+    (single_flag, sequence_flags)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_single_less_than_max() {
+        assert_eq!(
+            single_greater_than_any(Some(1.), &[Some(1.), Some(2.), Some(2.)], 0.2),
+            (Flag::Pass, vec![Flag::Pass, Flag::Pass, Flag::Pass])
+        );
+        assert_eq!(
+            single_greater_than_any(Some(1.), &[Some(1.), Some(2.), Some(2.)], -0.2),
+            (Flag::Fail, vec![Flag::Fail, Flag::Pass, Flag::Pass])
+        );
+        assert_eq!(
+            single_greater_than_any(Some(1.), &[Some(1.), None, Some(2.)], -0.2),
+            (Flag::Fail, vec![Flag::Fail, Flag::DataMissing, Flag::Pass])
+        );
+        assert_eq!(
+            single_greater_than_any(Some(1.), &[Some(1.), None, Some(2.)], 0.2),
+            (
+                Flag::DataMissing,
+                vec![Flag::Pass, Flag::DataMissing, Flag::Pass]
+            )
+        );
+    }
+}
