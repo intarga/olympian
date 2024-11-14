@@ -1,11 +1,11 @@
 mod greater_than;
 pub use greater_than::greater_than;
 
-mod single_greater_than_min;
-pub use single_greater_than_min::single_greater_than_min;
+mod single_greater_than_any;
+pub use single_greater_than_any::single_greater_than_any;
 
-mod single_less_than_max;
-pub use single_less_than_max::single_less_than_max;
+mod single_less_than_any;
+pub use single_less_than_any::single_less_than_any;
 
 mod single_outside_sequence;
 pub use single_outside_sequence::single_outside_sequence;
