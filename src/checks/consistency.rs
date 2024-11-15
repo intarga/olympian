@@ -1,5 +1,5 @@
 mod greater_than;
-pub use greater_than::greater_than;
+pub use greater_than::{greater_than, greater_than_cache};
 
 mod single_greater_than_any;
 pub use single_greater_than_any::single_greater_than_any;
