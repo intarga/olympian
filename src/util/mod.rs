@@ -47,6 +47,9 @@ pub struct Timeseries<T> {
     pub values: Vec<T>,
 }
 
+/// A pair of [`Timeseries`]
+pub type TimeseriesPair<T> = (Timeseries<T>, Timeseries<T>);
+
 /// Container for metereological data
 ///
 /// a [`new`](DataCache::new) method is provided to
@@ -140,8 +143,7 @@ pub struct ConsistencyCache {
     ///
     /// Each pair of timeseries are aligned with the other pairs on start_time and period
     /// `None`s represent gaps in the series.
-    #[allow(clippy::type_complexity)]
-    pub data: Vec<(Timeseries<Option<f32>>, Timeseries<Option<f32>>)>,
+    pub data: Vec<TimeseriesPair<Option<f32>>>,
     /// Time of the first observation in the timeseries
     ///
     /// the first timestamp applies to the first timeseries in each pair, and so for the second

@@ -42,7 +42,7 @@ pub mod checks;
 mod util;
 pub use util::{
     spatial_tree::SpatialTree, ConsistencyAlignment, ConsistencyCache, DataCache, Flag,
-    SingleOrVec, Timeseries, Timestamp,
+    SingleOrVec, Timeseries, TimeseriesPair, Timestamp,
 };
 
 /// Error type for Olympian
