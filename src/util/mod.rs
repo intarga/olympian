@@ -115,7 +115,7 @@ impl DataCache {
 }
 
 /// Alignment between each pair of timeseries in a [`ConsistencyCache`]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ConsistencyAlignment {
     /// Perfect alignment, the timeseries are the same length and each element of the first
     /// matches exactly one in the second
