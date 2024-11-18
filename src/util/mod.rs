@@ -114,29 +114,14 @@ impl DataCache {
     }
 }
 
-/// Alignment between each pair of timeseries in a [`ConsistencyCache`]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ConsistencyAlignment {
-    /// Perfect alignment, the timeseries are the same length and each element of the first
-    /// matches exactly one in the second
-    OneToOne,
-    /// The second timeseries is longer, and each element in the first timeseries is cotemporal
-    /// with the first element of a group in the second
-    Start,
-    /// The second timeseries is longer, and each element in the first timeseries is cotemporal
-    /// with the center element of a group in the second. In the case where the group is of even
-    /// length, then the later of the two center elements is taken to be the center
-    Center,
-    /// The second timeseries is longer, and each element in the first timeseries is cotemporal
-    /// with the last element of a group in the second
-    End,
-}
-
 /// Similar to [`DataCache`] but for use with consistency checks.
 ///
 /// As consistency checks typically compare two timeseries of different parameters (and perhaps
 /// different periods), the data field here contains a vector of pairs of timeseries which are
 /// passed together into consistency checks.
+///
+/// The first timeseries in each pair should all have the same length as each other, same for the
+/// second, and the length of the second should be `ratio *` the length of the first.
 #[derive(Debug, Clone)]
 pub struct ConsistencyCache {
     /// Vector of pairs of [`Timeseries`].
@@ -152,10 +137,8 @@ pub struct ConsistencyCache {
     ///
     /// the first period applies to the first timeseries in each pair, and so for the second
     pub period: (RelativeDuration, RelativeDuration),
-    /// Alignment between the two timeseries in each pair.
-    ///
-    /// See [`ConsistencyAlignment`] for more info on the meaning of each variant
-    pub alignment: ConsistencyAlignment,
+    /// number of elements in the second timeseries that correspond to one in the first
+    pub ratio: usize,
 }
 
 /// A type that can represent either a vector, or a single value
