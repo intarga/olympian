@@ -1,4 +1,4 @@
-use crate::{ConsistencyAlignment, ConsistencyCache, Error, Flag, Timeseries, TimeseriesPair};
+use crate::{ConsistencyCache, Error, Flag, Timeseries, TimeseriesPair};
 
 /// Consistency check between 2 climate parameters, where one (including a correction) should
 /// never be greater than the other.
@@ -22,19 +22,18 @@ pub fn greater_than(datum1: Option<f32>, datum2: Option<f32>, datum1_correction:
 
 /// Apply [`greater_than`] to a whole [`ConsistencyCache`]
 ///
-/// `cache.alignment` must be [`ConsistencyCache::OneToOne`], as that is the only alignment that
-/// makes sense for [`greater_than`]
+/// `cache.ratio` must be 1, as that is the only alignment that makes sense for [`greater_than`]
 ///
 /// ## Errors
 ///
-/// - `cache.alignment` is not [`ConsistencyCache::OneToOne`]
+/// - `cache.ratio` is not 1
 pub fn greater_than_cache(
     cache: &ConsistencyCache,
     correction: f32,
 ) -> Result<Vec<TimeseriesPair<Flag>>, Error> {
-    if cache.alignment != ConsistencyAlignment::OneToOne {
+    if cache.ratio != 1 {
         return Err(Error::InvalidInputShape(String::from(
-            "arg cache in greater_than_cache must be aligned OneToOne",
+            "arg cache in greater_than_cache must have cache.ratio == 1",
         )));
     }
 
@@ -95,7 +94,7 @@ mod tests {
                     )],
                     start_time: (crate::util::Timestamp(0), crate::util::Timestamp(0)),
                     period: (RelativeDuration::minutes(10), RelativeDuration::minutes(10)),
-                    alignment: ConsistencyAlignment::OneToOne
+                    ratio: 1,
                 },
                 0.2
             )
