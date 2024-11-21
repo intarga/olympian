@@ -2,7 +2,7 @@ mod greater_than;
 pub use greater_than::{greater_than, greater_than_cache};
 
 mod single_greater_than_any;
-pub use single_greater_than_any::single_greater_than_any;
+pub use single_greater_than_any::{single_greater_than_any, single_greater_than_any_cache};
 
 mod single_less_than_any;
 pub use single_less_than_any::single_less_than_any;
