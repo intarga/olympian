@@ -1,4 +1,4 @@
-use crate::Flag;
+use crate::{ConsistencyCache, Flag, Timeseries, TimeseriesPair};
 
 /// Compares a single value to a higher resolution sequence, where the single value should never
 /// be outside the range of the sequence (including an adjustment)
@@ -60,9 +60,55 @@ pub fn single_outside_sequence(
     }
 }
 
+/// Apply [`single_outside_sequence`] to a whole [`ConsistencyCache`]
+///
+/// ## Panics
+///
+/// - `cache.ratio` is 0
+pub fn single_outside_sequence_cache(
+    cache: &ConsistencyCache,
+    adjustment: f32,
+) -> Vec<TimeseriesPair<Flag>> {
+    let num_series = cache.data.len();
+    let mut result_vec = Vec::with_capacity(num_series);
+
+    for i in 0..num_series {
+        let (series1, series2) = &cache.data[i];
+
+        let flags1: Vec<Flag> = series1
+            .values
+            .iter()
+            .zip(series2.values.chunks(cache.ratio))
+            .map(|(datum1, datum2)| single_outside_sequence(*datum1, datum2, adjustment))
+            .collect();
+
+        // since single_outside_sequence only returns one flag that applies to both the single
+        // and the whole sequence, we need to duplicate each of these `cache.ratio` times to
+        // cover the whole sequence
+        let flags2: Vec<Flag> = flags1
+            .iter()
+            .flat_map(|flag| std::iter::repeat_n(*flag, cache.ratio))
+            .collect();
+
+        result_vec.push((
+            Timeseries {
+                tag: series1.tag.clone(),
+                values: flags1,
+            },
+            Timeseries {
+                tag: series2.tag.clone(),
+                values: flags2,
+            },
+        ))
+    }
+
+    result_vec
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chronoutil::RelativeDuration;
 
     #[test]
     fn test_single_outside_sequence() {
@@ -90,5 +136,102 @@ mod tests {
             single_outside_sequence(Some(1.), &[Some(1.), None, Some(2.)], 0.2),
             Flag::DataMissing
         );
+    }
+
+    #[test]
+    fn test_single_outside_sequence_cache() {
+        assert_eq!(
+            single_outside_sequence_cache(
+                &ConsistencyCache {
+                    data: vec![(
+                        Timeseries {
+                            tag: String::from("blindern1"),
+                            values: vec![
+                                Some(1.4),
+                                Some(1.),
+                                Some(2.4),
+                                Some(2.),
+                                Some(1.4),
+                                Some(1.)
+                            ]
+                        },
+                        Timeseries {
+                            tag: String::from("blindern2"),
+                            values: vec![
+                                Some(1.),
+                                Some(2.),
+                                Some(2.),
+                                //-------
+                                Some(1.),
+                                Some(2.),
+                                Some(2.),
+                                //-------
+                                Some(1.),
+                                Some(2.),
+                                Some(2.),
+                                //-------
+                                Some(1.),
+                                Some(2.),
+                                Some(2.),
+                                //-------
+                                Some(1.),
+                                None,
+                                Some(2.),
+                                //-------
+                                Some(1.),
+                                None,
+                                Some(2.),
+                            ]
+                        }
+                    )],
+                    start_time: (crate::util::Timestamp(0), crate::util::Timestamp(0)),
+                    period: (RelativeDuration::minutes(5), RelativeDuration::minutes(15)),
+                    ratio: 3,
+                },
+                0.2
+            ),
+            vec![(
+                Timeseries {
+                    tag: String::from("blindern1"),
+                    values: vec![
+                        Flag::Pass,
+                        Flag::Fail,
+                        Flag::Fail,
+                        Flag::Pass,
+                        Flag::Pass,
+                        Flag::DataMissing
+                    ]
+                },
+                Timeseries {
+                    tag: String::from("blindern2"),
+                    values: vec![
+                        Flag::Pass,
+                        Flag::Pass,
+                        Flag::Pass,
+                        //---------
+                        Flag::Fail,
+                        Flag::Fail,
+                        Flag::Fail,
+                        //---------
+                        Flag::Fail,
+                        Flag::Fail,
+                        Flag::Fail,
+                        //---------
+                        Flag::Pass,
+                        Flag::Pass,
+                        Flag::Pass,
+                        //---------
+                        Flag::Pass,
+                        Flag::Pass,
+                        Flag::Pass,
+                        //---------
+                        Flag::DataMissing,
+                        Flag::DataMissing,
+                        Flag::DataMissing,
+                        //---------
+                    ]
+                }
+            )]
+        )
     }
 }
