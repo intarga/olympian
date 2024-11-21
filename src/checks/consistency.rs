@@ -11,7 +11,7 @@ mod single_outside_sequence;
 pub use single_outside_sequence::single_outside_sequence;
 
 mod not_equal;
-pub use not_equal::not_equal;
+pub use not_equal::{not_equal, not_equal_cache};
 
 // TODO: Figure out the ideal container type (Analogous to [`crate::DataCache`]) to pass large
 // amounts of data into consistency checks
