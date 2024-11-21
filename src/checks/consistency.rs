@@ -8,7 +8,7 @@ mod single_less_than_any;
 pub use single_less_than_any::{single_less_than_any, single_less_than_any_cache};
 
 mod single_outside_sequence;
-pub use single_outside_sequence::single_outside_sequence;
+pub use single_outside_sequence::{single_outside_sequence, single_outside_sequence_cache};
 
 mod not_equal;
 pub use not_equal::{not_equal, not_equal_cache};
