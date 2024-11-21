@@ -1,4 +1,4 @@
-use crate::Flag;
+use crate::{ConsistencyCache, Flag, Timeseries, TimeseriesPair};
 
 /// Compares a single value to a higher resolution sequence, where the single value should never
 /// be less than any value in the sequence (including an adjustment)
@@ -62,9 +62,47 @@ pub fn single_less_than_any(
     (single_flag, sequence_flags)
 }
 
+/// Apply [`single_less_than_any`] to a whole [`ConsistencyCache`]
+///
+/// ## Panics
+///
+/// - `cache.ratio` is 0
+pub fn single_less_than_any_cache(
+    cache: &ConsistencyCache,
+    adjustment: f32,
+) -> Vec<TimeseriesPair<Flag>> {
+    let num_series = cache.data.len();
+    let mut result_vec = Vec::with_capacity(num_series);
+
+    for i in 0..num_series {
+        let (series1, series2) = &cache.data[i];
+
+        let (flags1, flags2): (Vec<Flag>, Vec<Vec<Flag>>) = series1
+            .values
+            .iter()
+            .zip(series2.values.chunks(cache.ratio))
+            .map(|(datum1, datum2)| single_less_than_any(*datum1, datum2, adjustment))
+            .unzip();
+
+        result_vec.push((
+            Timeseries {
+                tag: series1.tag.clone(),
+                values: flags1,
+            },
+            Timeseries {
+                tag: series2.tag.clone(),
+                values: flags2.concat(),
+            },
+        ))
+    }
+
+    result_vec
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chronoutil::RelativeDuration;
 
     #[test]
     fn test_single_less_than_max() {
@@ -87,5 +125,71 @@ mod tests {
             single_less_than_any(Some(1.), &[Some(1.), None, Some(0.)], 0.2),
             (Flag::Fail, vec![Flag::Fail, Flag::DataMissing, Flag::Pass])
         );
+    }
+
+    #[test]
+    fn test_single_less_than_any_cache() {
+        assert_eq!(
+            single_less_than_any_cache(
+                &ConsistencyCache {
+                    data: vec![(
+                        Timeseries {
+                            tag: String::from("blindern1"),
+                            values: vec![Some(1.), Some(1.4), Some(1.4), Some(1.)]
+                        },
+                        Timeseries {
+                            tag: String::from("blindern2"),
+                            values: vec![
+                                Some(1.),
+                                Some(0.),
+                                Some(0.),
+                                //-------
+                                Some(1.),
+                                Some(0.),
+                                Some(0.),
+                                //-------
+                                Some(1.),
+                                None,
+                                Some(0.),
+                                //-------
+                                Some(1.),
+                                None,
+                                Some(0.)
+                            ]
+                        }
+                    )],
+                    start_time: (crate::util::Timestamp(0), crate::util::Timestamp(0)),
+                    period: (RelativeDuration::minutes(5), RelativeDuration::minutes(15)),
+                    ratio: 3,
+                },
+                0.2
+            ),
+            vec![(
+                Timeseries {
+                    tag: String::from("blindern1"),
+                    values: vec![Flag::Fail, Flag::Pass, Flag::DataMissing, Flag::Fail]
+                },
+                Timeseries {
+                    tag: String::from("blindern2"),
+                    values: vec![
+                        Flag::Fail,
+                        Flag::Pass,
+                        Flag::Pass,
+                        //---------
+                        Flag::Pass,
+                        Flag::Pass,
+                        Flag::Pass,
+                        //---------
+                        Flag::Pass,
+                        Flag::DataMissing,
+                        Flag::Pass,
+                        //---------
+                        Flag::Fail,
+                        Flag::DataMissing,
+                        Flag::Pass,
+                    ]
+                }
+            )]
+        )
     }
 }
