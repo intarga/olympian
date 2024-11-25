@@ -28,7 +28,7 @@ pub fn monotonic_decrease_check(data: &[Option<f32>], lower_limit: f32, upper_li
     // apply `!` since we want `true` if there is no decrease
     let no_increase = !data.windows(2).any(|window| window[1] > window[0]);
 
-    let total_diff = data[0].unwrap() - data[24].unwrap();
+    let total_diff = data.first().unwrap().unwrap() - data.last().unwrap().unwrap();
 
     if (no_increase) && (lower_limit..=upper_limit).contains(&total_diff) {
         Flag::Fail
