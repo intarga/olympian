@@ -81,7 +81,7 @@ pub fn single_greater_than_any_cache(
             .values
             .iter()
             .zip(series2.values.chunks(cache.ratio))
-            .map(|(datum1, datum2)| single_greater_than_any(*datum1, datum2, adjustment))
+            .map(|(single, sequence)| single_greater_than_any(*single, sequence, adjustment))
             .unzip();
 
         result_vec.push((
