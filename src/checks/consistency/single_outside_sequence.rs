@@ -1,6 +1,6 @@
 use crate::{ConsistencyCache, Flag, Timeseries, TimeseriesPair};
 
-/// Compares a single value to a higher resolution sequence, where the single value should never
+/// Compares a single value to a sequence, where the single value should never
 /// be outside the range of the sequence (including an adjustment)
 ///
 /// Returns:
