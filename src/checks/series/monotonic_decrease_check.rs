@@ -106,7 +106,6 @@ mod tests {
             .enumerate()
             .map(|(i, val)| Some(val - (i as f32 * 0.1)))
             .collect();
-        println!("decreasing_sequence: {:?}", decreasing_sequence);
         assert_eq!(
             monotonic_decrease_check(&decreasing_sequence.clone(), 0.7, 100.),
             Flag::Fail
