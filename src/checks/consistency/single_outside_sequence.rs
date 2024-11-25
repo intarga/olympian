@@ -79,7 +79,7 @@ pub fn single_outside_sequence_cache(
             .values
             .iter()
             .zip(series2.values.chunks(cache.ratio))
-            .map(|(datum1, datum2)| single_outside_sequence(*datum1, datum2, adjustment))
+            .map(|(single, sequence)| single_outside_sequence(*single, sequence, adjustment))
             .collect();
 
         // since single_outside_sequence only returns one flag that applies to both the single
