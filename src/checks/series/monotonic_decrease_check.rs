@@ -3,9 +3,10 @@ use crate::{DataCache, Error, Flag, Timeseries};
 /// Timeseries check that detects if a timeseries is monotonically slightly decreasing in a given
 /// window. Useful for detecting evaporation/leakage of a bucket measuring precipitation.
 ///
-/// Takes a series of data points representing the window to check for increases, and upper and
-/// lower limits that the total difference over the whole series must be within to meet the
-/// failure condition
+/// The total difference over the whole series provided in `data` must be within the provided upper
+/// and lower limits to meet the failure condition. In the case of detecting evaporation/leakage,
+/// the lower limit is used to discount false positives due to noise, and the upper limit is used
+/// to discount manual emptying of the bucket.
 ///
 /// Since this check is really looking at the intervals between data points, If you are passing in
 /// regularly spaced chunks of a time series (e.g. each day's hourly values), you should include
