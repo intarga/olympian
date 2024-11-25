@@ -14,12 +14,12 @@ use crate::{DataCache, Error, Flag, Timeseries};
 /// example you should pass in 25 points, including both the 00:00 and 24:00 points)
 ///
 /// Returns:
-/// - [`Flag::DataMissing`] if any of the data points are missing,
+/// - [`Flag::DataMissing`] if any of the data points are missing, or the `data` slice is empty
 /// - [`Flag::Fail`] if there are no increases between consecutive data points in the series
 ///   AND the total decrease over the series is within the given range
 /// - [`Flag::Pass`] otherwise.
 pub fn monotonic_decrease_check(data: &[Option<f32>], lower_limit: f32, upper_limit: f32) -> Flag {
-    if data.iter().any(Option::is_none) {
+    if data.is_empty() || data.iter().any(Option::is_none) {
         return Flag::DataMissing;
     }
 
