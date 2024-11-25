@@ -23,18 +23,18 @@ pub fn single_outside_sequence(
         }
     };
 
-    // find the minimum value and maximum values in the sequence (None if they are all missing), as well as a bool
+    // find the minimum and maximum values in the sequence (None if they are all missing), as well as a bool
     // indicating if any value was missing
     let (minmax, missing) = sequence.iter().fold(
         (None, false),
         |acc: (Option<(f32, f32)>, bool), elem| match elem {
             // if the element wasn't missing...
             Some(value) => match acc.0 {
-                // set the min if there isn't already a min, or the element is lower
+                // set the minmax if there isn't already a minmax, or the element is lower
                 Some(minmax) => (Some((minmax.0.min(*value), minmax.1.max(*value))), acc.1),
                 None => (Some((*value, *value)), acc.1),
             },
-            // if the element was missing, leave the min unchanged, but set `missing` to true
+            // if the element was missing, leave the minmax unchanged, but set `missing` to true
             None => (acc.0, true),
         },
     );
