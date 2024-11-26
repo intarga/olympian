@@ -24,10 +24,8 @@ pub fn single_greater_than_any(
 ) -> (Flag, Vec<Flag>) {
     let single = match single {
         Some(value) => value,
-        None => {
-            // If the single is missing, we can't do a check at all
-            return (Flag::DataMissing, vec![Flag::DataMissing; sequence.len()]);
-        }
+        // If the single is missing, we can't do a check at all
+        None => return (Flag::DataMissing, vec![Flag::DataMissing; sequence.len()]),
     };
 
     let sequence_flags: Vec<Flag> = sequence
