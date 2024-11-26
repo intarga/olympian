@@ -17,10 +17,8 @@ pub fn single_outside_sequence(
 ) -> Flag {
     let single = match single {
         Some(value) => value,
-        None => {
-            // If the single is missing, we can't do a check at all
-            return Flag::DataMissing;
-        }
+        // If the single is missing, we can't do a check at all
+        None => return Flag::DataMissing,
     };
 
     // find the minimum and maximum values in the sequence (None if they are all missing), as well as a bool
@@ -40,11 +38,9 @@ pub fn single_outside_sequence(
     );
     let (min, max) = match minmax {
         Some(value) => value,
-        // if min is None at this point, then all the elements of the sequence were missing...
-        None => {
-            // so we can't perform the check
-            return Flag::DataMissing;
-        }
+        // if min is None at this point, then all the elements of the sequence were missing,
+        // so we can't perform the check
+        None => return Flag::DataMissing,
     };
 
     if single > min + adjustment && single < max + adjustment {
