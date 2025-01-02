@@ -6,7 +6,7 @@ use crate::{
     },
     DataCache, Error, Flag,
 };
-use faer::{solvers::SolverCore, Mat};
+use faer::{prelude::SolverCore, Mat};
 
 /// Specific arguments to sct, broken into a struct to make the function
 /// signature more readable.
