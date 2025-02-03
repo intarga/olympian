@@ -1,3 +1,5 @@
+use std::ops::SubAssign;
+
 use crate::{
     util::{
         self,
@@ -6,7 +8,7 @@ use crate::{
     },
     DataCache, Error, Flag,
 };
-use faer::{prelude::SolverCore, Mat};
+use faer::{linalg::solvers::DenseSolveCore, Mat};
 
 /// Specific arguments to sct, broken into a struct to make the function
 /// signature more readable.
@@ -422,7 +424,7 @@ pub fn sct(
                     let mut dh_vector = Vec::with_capacity(box_size - 1);
                     for j in 0..box_size {
                         if i != j {
-                            dh_vector.push(disth.read(i, j));
+                            dh_vector.push(disth.get(i, j).to_owned());
                         }
                     }
                     compute_quantile(0.10, &dh_vector)
@@ -434,8 +436,8 @@ pub fn sct(
                 .max(dh.into_iter().sum::<f32>() / box_size as f32);
 
             let mut s: Mat<f32> = Mat::from_fn(box_size, box_size, |i, j| {
-                let value = (-0.5 * (disth.read(i, j) / dh_mean).powi(2)
-                    - 0.5 * (distz.read(i, j) / args.vertical_scale).powi(2))
+                let value = (-0.5 * (disth.get(i, j) / dh_mean).powi(2)
+                    - 0.5 * (distz.get(i, j) / args.vertical_scale).powi(2))
                 .exp();
                 // weight the diagonal?? (0.5 default)
                 if i == j {
@@ -459,18 +461,19 @@ pub fn sct(
 
             // unweight the diagonal
             for i in 0..box_size {
-                s.write(i, i, s.read(i, i) - eps2_box.index(i))
+                let elem = s.get_mut(i, i);
+                elem.sub_assign(eps2_box.index(i));
             }
 
             let s_inv_d: Vec<f32> = (0..box_size)
-                .map(|i| (0..box_size).map(|j| s_inv.read(i, j) * d[j]).sum())
+                .map(|i| (0..box_size).map(|j| s_inv.get(i, j) * d[j]).sum())
                 .collect();
 
             let ares_temp: Vec<f32> = (0..box_size)
-                .map(|i| (0..box_size).map(|j| s.read(i, j) * s_inv_d[j]).sum())
+                .map(|i| (0..box_size).map(|j| s.get(i, j) * s_inv_d[j]).sum())
                 .collect();
 
-            let z_inv: Vec<f32> = (0..box_size).map(|i| 1. / s_inv.read(i, i)).collect();
+            let z_inv: Vec<f32> = (0..box_size).map(|i| 1. / s_inv.get(i, i)).collect();
 
             let ares: Vec<f32> = (0..box_size).map(|i| ares_temp[i] - d[i]).collect();
 
