@@ -18,9 +18,9 @@ use crate::{ConsistencyCache, Flag, Timeseries, TimeseriesPair};
 ///   plus the adjustment),
 /// - [`Flag::Pass`] otherwise.
 pub fn single_greater_than_any(
-    single: Option<f32>,
-    sequence: &[Option<f32>],
-    adjustment: f32,
+    single: Option<f64>,
+    sequence: &[Option<f64>],
+    adjustment: f64,
 ) -> (Flag, Vec<Flag>) {
     let single = match single {
         Some(value) => value,
@@ -67,7 +67,7 @@ pub fn single_greater_than_any(
 /// - `cache.ratio` is 0
 pub fn single_greater_than_any_cache(
     cache: &ConsistencyCache,
-    adjustment: f32,
+    adjustment: f64,
 ) -> Vec<TimeseriesPair<Flag>> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);

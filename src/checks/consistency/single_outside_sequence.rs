@@ -11,9 +11,9 @@ use crate::{ConsistencyCache, Flag, Timeseries, TimeseriesPair};
 ///   point did not satisfy the invariant.
 /// - [`Flag::Fail`] otherwise.
 pub fn single_outside_sequence(
-    single: Option<f32>,
-    sequence: &[Option<f32>],
-    adjustment: f32,
+    single: Option<f64>,
+    sequence: &[Option<f64>],
+    adjustment: f64,
 ) -> Flag {
     let single = match single {
         Some(value) => value,
@@ -25,7 +25,7 @@ pub fn single_outside_sequence(
     // indicating if any value was missing
     let (minmax, missing) = sequence.iter().fold(
         (None, false),
-        |acc: (Option<(f32, f32)>, bool), elem| match elem {
+        |acc: (Option<(f64, f64)>, bool), elem| match elem {
             // if the element wasn't missing...
             Some(value) => match acc.0 {
                 // set the minmax if there isn't already a minmax, or the element is lower
@@ -63,7 +63,7 @@ pub fn single_outside_sequence(
 /// - `cache.ratio` is 0
 pub fn single_outside_sequence_cache(
     cache: &ConsistencyCache,
-    adjustment: f32,
+    adjustment: f64,
 ) -> Vec<TimeseriesPair<Flag>> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);

@@ -6,7 +6,7 @@ use crate::{util::Timeseries, DataCache, Flag};
 /// - [`Flag::DataMissing`] if the observation is missing,
 /// - [`Flag::Fail`] if it matches any of the special values
 /// - [`Flag::Pass`] otherwise.
-pub fn special_values_check(datum: Option<f32>, special_values: &[f32]) -> Flag {
+pub fn special_values_check(datum: Option<f64>, special_values: &[f64]) -> Flag {
     match datum {
         None => Flag::DataMissing,
         Some(datum) => {
@@ -21,7 +21,7 @@ pub fn special_values_check(datum: Option<f32>, special_values: &[f32]) -> Flag 
 /// Apply [`special_values_check`] to a whole [`DataCache`]
 pub fn special_values_check_cache(
     cache: &DataCache,
-    special_values: &[f32],
+    special_values: &[f64],
 ) -> Vec<Timeseries<Flag>> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);

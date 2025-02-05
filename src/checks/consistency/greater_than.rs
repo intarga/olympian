@@ -7,7 +7,7 @@ use crate::{ConsistencyCache, Error, Flag, Timeseries, TimeseriesPair};
 /// - [`Flag::DataMissing`] if either datum is missing,
 /// - [`Flag::Fail`] if datum1 + datum1_correction > datum2,
 /// - [`Flag::Pass`] otherwise.
-pub fn greater_than(datum1: Option<f32>, datum2: Option<f32>, datum1_correction: f32) -> Flag {
+pub fn greater_than(datum1: Option<f64>, datum2: Option<f64>, datum1_correction: f64) -> Flag {
     if datum1.is_none() || datum2.is_none() {
         return Flag::DataMissing;
     }
@@ -29,7 +29,7 @@ pub fn greater_than(datum1: Option<f32>, datum2: Option<f32>, datum1_correction:
 /// - `cache.ratio` is not 1
 pub fn greater_than_cache(
     cache: &ConsistencyCache,
-    correction: f32,
+    correction: f64,
 ) -> Result<Vec<TimeseriesPair<Flag>>, Error> {
     if cache.ratio != 1 {
         return Err(Error::InvalidInputShape(String::from(

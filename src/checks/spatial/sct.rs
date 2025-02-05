@@ -20,25 +20,25 @@ pub struct SctArgs {
     pub num_max: usize,
     // FIXME: this doc comment can be improved
     /// Radius in which OI will be reused. Unit: m
-    pub inner_radius: f32,
+    pub inner_radius: f64,
     /// Radius for computing OI and background. Unit: m
-    pub outer_radius: f32,
+    pub outer_radius: f64,
     /// The number of iterations of SCT to perform before returning.
     pub num_iterations: u32,
     /// Minimum number of observations to compute vertical profile.
     pub num_min_prof: usize,
     /// Minimum elevation difference to compute vertical profile. Unit: m
-    pub min_elev_diff: f32,
+    pub min_elev_diff: f64,
     /// Minimum horizontal decorrelation length. Unit: m
-    pub min_horizontal_scale: f32,
+    pub min_horizontal_scale: f64,
     /// Vertical decorrelation length. Unit: m
-    pub vertical_scale: f32,
+    pub vertical_scale: f64,
     /// Positive deviation allowed. Unit: σ (standard deviations)
-    pub pos: SingleOrVec<f32>,
+    pub pos: SingleOrVec<f64>,
     /// Negative deviation allowed. Unit: σ (standard deviations)
-    pub neg: SingleOrVec<f32>,
+    pub neg: SingleOrVec<f64>,
     /// Ratio of observation error variance to background variance.
-    pub eps2: SingleOrVec<f32>,
+    pub eps2: SingleOrVec<f64>,
 }
 
 fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
@@ -53,16 +53,16 @@ fn subset<T: Copy>(array: &[T], indices: &[usize]) -> Vec<T> {
 }
 
 fn compute_vertical_profile_theil_sen(
-    elevs: &[f32],
-    values: &[f32],
+    elevs: &[f64],
+    values: &[f64],
     num_min_prof: usize,
-    min_elev_diff: f32,
-) -> Vec<f32> {
+    min_elev_diff: f64,
+) -> Vec<f64> {
     let n = values.len();
 
     // Starting value guesses
-    let gamma: f32 = -0.0065;
-    let mean_t: f32 = values.iter().sum::<f32>() / n as f32; // should this be f64?
+    let gamma: f64 = -0.0065;
+    let mean_t: f64 = values.iter().sum::<f64>() / n as f64; // should this be f64?
 
     // special case when all observations have the same elevation
     if elevs.iter().min_by(|a, b| a.total_cmp(b)) == elevs.iter().max_by(|a, b| a.total_cmp(b)) {
@@ -81,7 +81,7 @@ fn compute_vertical_profile_theil_sen(
         gamma
     } else {
         let nm = n * (n - 1) / 2;
-        let mut m: Vec<f32> = Vec::with_capacity(nm);
+        let mut m: Vec<f64> = Vec::with_capacity(nm);
         for i in 0..(n - 1) {
             for j in (i + 1)..n {
                 m.push(if (elevs[i] - elevs[j]).abs() < 1. {
@@ -93,7 +93,7 @@ fn compute_vertical_profile_theil_sen(
         }
         compute_quantile(0.5, &m)
     };
-    let q: Vec<f32> = values
+    let q: Vec<f64> = values
         .iter()
         .zip(elevs)
         .map(|(val, elev)| val - m_median * elev)
@@ -107,8 +107,8 @@ fn compute_vertical_profile_theil_sen(
 }
 
 // TODO: replace assertions with errors or remove them
-fn compute_quantile(quantile: f32, array: &[f32]) -> f32 {
-    let mut new_array: Vec<f32> = array
+fn compute_quantile(quantile: f64, array: &[f64]) -> f64 {
+    let mut new_array: Vec<f64> = array
         .iter()
         .copied()
         .filter(|x| util::is_valid(*x))
@@ -120,12 +120,12 @@ fn compute_quantile(quantile: f32, array: &[f32]) -> f32 {
     assert!(n > 0);
 
     // get the quantile from the sorted array
-    let lower_index = (quantile * (n - 1) as f32).floor() as usize;
-    let upper_index = (quantile * (n - 1) as f32).ceil() as usize;
+    let lower_index = (quantile * (n - 1) as f64).floor() as usize;
+    let upper_index = (quantile * (n - 1) as f64).ceil() as usize;
     let lower_value = new_array[lower_index];
     let upper_value = new_array[upper_index];
-    let lower_quantile = lower_index as f32 / (n - 1) as f32;
-    let upper_quantile = upper_index as f32 / (n - 1) as f32;
+    let lower_quantile = lower_index as f64 / (n - 1) as f64;
+    let upper_quantile = upper_index as f64 / (n - 1) as f64;
     let exact_q = if lower_index == upper_index {
         lower_value
     } else {
@@ -142,16 +142,16 @@ fn compute_quantile(quantile: f32, array: &[f32]) -> f32 {
     exact_q
 }
 
-fn invert_matrix(input: &Mat<f32>) -> Mat<f32> {
+fn invert_matrix(input: &Mat<f64>) -> Mat<f64> {
     let lu = input.partial_piv_lu();
     lu.inverse()
 }
 
 fn remove_flagged<'a>(
     neighbours: Vec<&'a SpatialPoint>,
-    distances: Vec<f32>,
+    distances: Vec<f64>,
     flags: &[Flag],
-) -> (Vec<&'a SpatialPoint>, Vec<f32>) {
+) -> (Vec<&'a SpatialPoint>, Vec<f64>) {
     let vec_length = neighbours.len();
     let mut neighbours_new = Vec::with_capacity(vec_length);
     let mut distances_new = Vec::with_capacity(vec_length);
@@ -214,7 +214,7 @@ fn remove_flagged<'a>(
 /// \* optional, ou = Unit of the observation, σ = Standard deviations
 #[allow(clippy::too_many_arguments)]
 pub fn sct(
-    data: &[Option<f32>],
+    data: &[Option<f64>],
     rtree: &SpatialTree,
     args: &SctArgs,
     obs_to_check: Option<&[bool]>,
@@ -369,7 +369,7 @@ pub fn sct(
                 remove_flagged(neighbours_unfiltered, distances_unfiltered, &flags);
 
             if neighbours.len() > args.num_max {
-                let mut pairs: Vec<(&SpatialPoint, f32)> =
+                let mut pairs: Vec<(&SpatialPoint, f64)> =
                     neighbours.into_iter().zip(distances.into_iter()).collect();
                 pairs.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
 
@@ -394,7 +394,7 @@ pub fn sct(
             let values_box = subset(data, &neighbour_indices)
                 .into_iter()
                 .map(|v| v.unwrap())
-                .collect::<Vec<f32>>();
+                .collect::<Vec<f64>>();
             let eps2_box = match &args.eps2 {
                 SingleOrVec::Single(eps2_value) => SingleOrVec::Single(*eps2_value),
                 SingleOrVec::Vec(eps2_vec) => {
@@ -411,15 +411,15 @@ pub fn sct(
                 args.min_elev_diff,
             );
 
-            let disth: Mat<f32> = Mat::from_fn(box_size, box_size, |i, j| {
+            let disth: Mat<f64> = Mat::from_fn(box_size, box_size, |i, j| {
                 // TODO: remove this unwrap
                 util::calc_distance(lats_box[i], lons_box[i], lats_box[j], lons_box[j]).unwrap()
             });
-            let distz: Mat<f32> = Mat::from_fn(box_size, box_size, |i, j| {
+            let distz: Mat<f64> = Mat::from_fn(box_size, box_size, |i, j| {
                 (elevs_box[i] - elevs_box[j]).abs()
             });
             // TODO: remove dh, and just reduce straight into dh_mean?
-            let dh: Vec<f32> = (0..box_size)
+            let dh: Vec<f64> = (0..box_size)
                 .map(|i| {
                     let mut dh_vector = Vec::with_capacity(box_size - 1);
                     for j in 0..box_size {
@@ -431,11 +431,11 @@ pub fn sct(
                 })
                 .collect();
 
-            let dh_mean: f32 = args
+            let dh_mean: f64 = args
                 .min_horizontal_scale
-                .max(dh.into_iter().sum::<f32>() / box_size as f32);
+                .max(dh.into_iter().sum::<f64>() / box_size as f64);
 
-            let mut s: Mat<f32> = Mat::from_fn(box_size, box_size, |i, j| {
+            let mut s: Mat<f64> = Mat::from_fn(box_size, box_size, |i, j| {
                 let value = (-0.5 * (disth.get(i, j) / dh_mean).powi(2)
                     - 0.5 * (distz.get(i, j) / args.vertical_scale).powi(2))
                 .exp();
@@ -448,7 +448,7 @@ pub fn sct(
             });
 
             // difference between actual temp and temp from vertical profile
-            let d: Vec<f32> = (0..box_size)
+            let d: Vec<f64> = (0..box_size)
                 .map(|i| values_box[i] - vertical_profile[i])
                 .collect();
 
@@ -465,22 +465,22 @@ pub fn sct(
                 elem.sub_assign(eps2_box.index(i));
             }
 
-            let s_inv_d: Vec<f32> = (0..box_size)
+            let s_inv_d: Vec<f64> = (0..box_size)
                 .map(|i| (0..box_size).map(|j| s_inv.get(i, j) * d[j]).sum())
                 .collect();
 
-            let ares_temp: Vec<f32> = (0..box_size)
+            let ares_temp: Vec<f64> = (0..box_size)
                 .map(|i| (0..box_size).map(|j| s.get(i, j) * s_inv_d[j]).sum())
                 .collect();
 
-            let z_inv: Vec<f32> = (0..box_size).map(|i| 1. / s_inv.get(i, i)).collect();
+            let z_inv: Vec<f64> = (0..box_size).map(|i| 1. / s_inv.get(i, i)).collect();
 
-            let ares: Vec<f32> = (0..box_size).map(|i| ares_temp[i] - d[i]).collect();
+            let ares: Vec<f64> = (0..box_size).map(|i| ares_temp[i] - d[i]).collect();
 
-            let cvres: Vec<f32> = (0..box_size).map(|i| -1. * z_inv[i] * s_inv_d[i]).collect();
+            let cvres: Vec<f64> = (0..box_size).map(|i| -1. * z_inv[i] * s_inv_d[i]).collect();
 
-            let sig2o = 0.01_f32
-                .max((0..box_size).map(|i| d[i] * -1. * ares[i]).sum::<f32>() / box_size as f32);
+            let sig2o = 0.01_f64
+                .max((0..box_size).map(|i| d[i] * -1. * ares[i]).sum::<f64>() / box_size as f64);
 
             let curr = i;
             for i in 0..box_size {
@@ -493,7 +493,7 @@ pub fn sct(
                 }
                 let dist = distances[i];
                 if dist <= args.inner_radius {
-                    let pog: f32 = cvres[i] * ares[i] / sig2o;
+                    let pog: f64 = cvres[i] * ares[i] / sig2o;
                     assert!(util::is_valid(pog));
                     prob_gross_error[index] = pog.max(prob_gross_error[index]);
                     if (cvres[i] < 0. && pog > *args.pos.index(index))
@@ -534,7 +534,7 @@ pub fn sct_cache(
 
     for i in (cache.num_leading_points as usize)..(series_len - cache.num_trailing_points as usize)
     {
-        let timeslice: Vec<Option<f32>> = cache.data.iter().map(|ts| ts.values[i]).collect();
+        let timeslice: Vec<Option<f64>> = cache.data.iter().map(|ts| ts.values[i]).collect();
         let spatial_result = sct(&timeslice, &cache.rtree, args, obs_to_check)?;
 
         for i in 0..spatial_result.len() {
@@ -584,9 +584,9 @@ mod tests {
             sct(
                 &vec![Some(1.); N],
                 &SpatialTree::from_latlons(
-                    (0..N).map(|i| ((i as f32).powi(2) * 0.001) % 1.).collect(),
+                    (0..N).map(|i| ((i as f64).powi(2) * 0.001) % 1.).collect(),
                     (0..N)
-                        .map(|i| ((i as f32 + 1.).powi(2) * 0.001) % 1.)
+                        .map(|i| ((i as f64 + 1.).powi(2) * 0.001) % 1.)
                         .collect(),
                     vec![1.; N],
                 ),

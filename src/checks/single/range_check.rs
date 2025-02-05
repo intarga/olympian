@@ -6,7 +6,7 @@ use crate::{util::Timeseries, DataCache, Flag};
 /// - [`Flag::DataMissing`] if the observation is missing,
 /// - [`Flag::Fail`] if it is outside the upper or lower limits,
 /// - [`Flag::Pass`] otherwise.
-pub fn range_check(datum: Option<f32>, lower_limit: f32, upper_limit: f32) -> Flag {
+pub fn range_check(datum: Option<f64>, lower_limit: f64, upper_limit: f64) -> Flag {
     match datum {
         None => Flag::DataMissing,
         Some(datum) => {
@@ -21,8 +21,8 @@ pub fn range_check(datum: Option<f32>, lower_limit: f32, upper_limit: f32) -> Fl
 /// Apply [`range_check`] to a whole [`DataCache`]
 pub fn range_check_cache(
     cache: &DataCache,
-    lower_limit: f32,
-    upper_limit: f32,
+    lower_limit: f64,
+    upper_limit: f64,
 ) -> Vec<Timeseries<Flag>> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);

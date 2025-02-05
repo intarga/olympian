@@ -18,7 +18,7 @@ use crate::{DataCache, Error, Flag, Timeseries};
 /// - [`Flag::Fail`] if there are no increases between consecutive data points in the series
 ///   AND the total decrease over the series is within the given range
 /// - [`Flag::Pass`] otherwise.
-pub fn monotonic_decrease_check(data: &[Option<f32>], lower_limit: f32, upper_limit: f32) -> Flag {
+pub fn monotonic_decrease_check(data: &[Option<f64>], lower_limit: f64, upper_limit: f64) -> Flag {
     if data.is_empty() || data.iter().any(Option::is_none) {
         return Flag::DataMissing;
     }
@@ -65,8 +65,8 @@ pub fn monotonic_decrease_check(data: &[Option<f32>], lower_limit: f32, upper_li
 /// - data has `num_leading_points` or `num_trailing_points` < `window_size`
 pub fn monotonic_decrease_check_cache(
     cache: &DataCache,
-    lower_limit: f32,
-    upper_limit: f32,
+    lower_limit: f64,
+    upper_limit: f64,
     // TODO: should this maybe be a usize? would require changing the type of num_leading_points
     // in DataCache
     window_size: u8,
@@ -138,10 +138,10 @@ mod tests {
 
     #[test]
     fn test_monotonic_decrease_check() {
-        let decreasing_sequence: Vec<Option<f32>> = repeat(200.)
+        let decreasing_sequence: Vec<Option<f64>> = repeat(200.)
             .take(25)
             .enumerate()
-            .map(|(i, val)| Some(val - (i as f32 * 0.1)))
+            .map(|(i, val)| Some(val - (i as f64 * 0.1)))
             .collect();
         assert_eq!(
             monotonic_decrease_check(&decreasing_sequence.clone(), 0.7, 100.),
