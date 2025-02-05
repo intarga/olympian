@@ -10,7 +10,7 @@ use crate::{ConsistencyCache, Error, Flag, Timeseries, TimeseriesPair};
 /// - [`Flag::DataMissing`] if either datum is missing,
 /// - [`Flag::Fail`] if the difference between datum1 and datum2 is greater than threshold,
 /// - [`Flag::Pass`] otherwise.
-pub fn not_equal(datum1: Option<f32>, datum2: Option<f32>, threshold: f32) -> Flag {
+pub fn not_equal(datum1: Option<f64>, datum2: Option<f64>, threshold: f64) -> Flag {
     if datum1.is_none() || datum2.is_none() {
         return Flag::DataMissing;
     }
@@ -31,7 +31,7 @@ pub fn not_equal(datum1: Option<f32>, datum2: Option<f32>, threshold: f32) -> Fl
 /// - `cache.ratio` is not 1
 pub fn not_equal_cache(
     cache: &ConsistencyCache,
-    threshold: f32,
+    threshold: f64,
 ) -> Result<Vec<TimeseriesPair<Flag>>, Error> {
     if cache.ratio != 1 {
         return Err(Error::InvalidInputShape(String::from(

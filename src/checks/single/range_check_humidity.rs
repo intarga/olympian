@@ -7,7 +7,7 @@ use crate::{util::Timeseries, DataCache, Flag};
 /// - ([`Flag::Fail`], None) if humidity less than 5% or greater than 105%,
 /// - ([`Flag::Warn`], Some(100.)) between 100% and 105%,
 /// - ([`Flag::Pass`], None) otherwise.
-pub fn range_check_humidity(datum: Option<f32>) -> (Flag, Option<f32>) {
+pub fn range_check_humidity(datum: Option<f64>) -> (Flag, Option<f64>) {
     match datum {
         None => (Flag::DataMissing, None),
         Some(datum) => {
@@ -25,7 +25,7 @@ pub fn range_check_humidity(datum: Option<f32>) -> (Flag, Option<f32>) {
 //TODO: is this the optimal return signature for corrections?
 /// Apply [`range_check_humidity`] to a whole [`DataCache`]
 #[allow(clippy::type_complexity)]
-pub fn range_check_humidity_cache(cache: &DataCache) -> Vec<Timeseries<(Flag, Option<f32>)>> {
+pub fn range_check_humidity_cache(cache: &DataCache) -> Vec<Timeseries<(Flag, Option<f64>)>> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);
     let series_len = match cache.data.first() {

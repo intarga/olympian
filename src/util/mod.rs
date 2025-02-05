@@ -66,7 +66,7 @@ pub struct DataCache {
     /// where the first and last sections are `DataCache.num_leading_points` and
     /// `DataCache.num_trailing_points` long, respectively.
     /// The actual observations to be QCed (i.e. flagged) lie in the middle section.
-    pub data: Vec<Timeseries<Option<f32>>>,
+    pub data: Vec<Timeseries<Option<f64>>>,
     /// Time of the first observation in data
     ///
     /// This means the first observation that will actually be QCed, so excluding the "leading"
@@ -93,10 +93,10 @@ pub struct DataCache {
 impl DataCache {
     /// Create a new DataCache without manually constructing the R*-tree
     pub fn new(
-        data: Vec<Timeseries<Option<f32>>>,
-        lats: Vec<f32>,
-        lons: Vec<f32>,
-        elevs: Vec<f32>,
+        data: Vec<Timeseries<Option<f64>>>,
+        lats: Vec<f64>,
+        lons: Vec<f64>,
+        elevs: Vec<f64>,
         start_time: Timestamp,
         period: RelativeDuration,
         num_leading_points: u8,
@@ -128,7 +128,7 @@ pub struct ConsistencyCache {
     ///
     /// Each pair of timeseries are aligned with the other pairs on start_time and period
     /// `None`s represent gaps in the series.
-    pub data: Vec<TimeseriesPair<Option<f32>>>,
+    pub data: Vec<TimeseriesPair<Option<f64>>>,
     /// Time of the first observation in the timeseries
     ///
     /// the first timestamp applies to the first timeseries in each pair, and so for the second
@@ -159,14 +159,14 @@ impl<T> SingleOrVec<T> {
     }
 }
 
-pub(crate) const RADIUS_EARTH: f32 = 6371.0;
+pub(crate) const RADIUS_EARTH: f64 = 6371.0;
 
-pub(crate) fn is_valid(value: f32) -> bool {
-    !f32::is_nan(value) && !f32::is_infinite(value)
+pub(crate) fn is_valid(value: f64) -> bool {
+    !f64::is_nan(value) && !f64::is_infinite(value)
 }
 
 /// convert lat-lon to xyz coordinates
-pub(crate) fn convert_coordinates(lat: f32, lon: f32) -> (f32, f32, f32) {
+pub(crate) fn convert_coordinates(lat: f64, lon: f64) -> (f64, f64, f64) {
     (
         lat.to_radians().cos() * lon.to_radians().cos() * RADIUS_EARTH,
         lat.to_radians().cos() * lon.to_radians().sin() * RADIUS_EARTH,
@@ -175,7 +175,7 @@ pub(crate) fn convert_coordinates(lat: f32, lon: f32) -> (f32, f32, f32) {
 }
 
 /// find the distance in km between two lat-lon points
-pub(crate) fn calc_distance(lat1: f32, lon1: f32, lat2: f32, lon2: f32) -> Result<f32, Error> {
+pub(crate) fn calc_distance(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> Result<f64, Error> {
     // lons are checked against 360 here, not 180, because some people apparently use
     // conventions of 0-360 and -360-0...
     if lat1.abs() > 90. || lat2.abs() > 90. || lon1.abs() > 360. || lon2.abs() > 360. {
@@ -204,6 +204,6 @@ pub(crate) fn calc_distance(lat1: f32, lon1: f32, lat2: f32, lon2: f32) -> Resul
 }
 
 /// find the distance in km between two xyz points
-pub(crate) fn calc_distance_xyz(x0: f32, y0: f32, z0: f32, x1: f32, y1: f32, z1: f32) -> f32 {
+pub(crate) fn calc_distance_xyz(x0: f64, y0: f64, z0: f64, x1: f64, y1: f64, z1: f64) -> f64 {
     ((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1) + (z0 - z1) * (z0 - z1)).sqrt()
 }

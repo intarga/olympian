@@ -3,10 +3,10 @@ use rstar::{primitives::GeomWithData, RTree};
 
 /// A point in the [`SpatialTree`]
 ///
-/// The `[f32; 3]` represents the xyz coordinates of the point, which is used
+/// The `[f64; 3]` represents the xyz coordinates of the point, which is used
 /// to spatially index, and the usize represents the index into the lats, lons,
 /// elevs, and values arrays associated with that point.
-pub(crate) type SpatialPoint = GeomWithData<[f32; 3], usize>;
+pub(crate) type SpatialPoint = GeomWithData<[f64; 3], usize>;
 
 /// An R-tree to spatially index data to spatially index data
 ///
@@ -14,9 +14,9 @@ pub(crate) type SpatialPoint = GeomWithData<[f32; 3], usize>;
 #[derive(Debug, Clone)]
 pub struct SpatialTree {
     pub(crate) tree: RTree<SpatialPoint>,
-    pub(crate) lats: Vec<f32>,
-    pub(crate) lons: Vec<f32>,
-    pub(crate) elevs: Vec<f32>,
+    pub(crate) lats: Vec<f64>,
+    pub(crate) lons: Vec<f64>,
+    pub(crate) elevs: Vec<f64>,
 }
 
 impl SpatialTree {
@@ -25,7 +25,7 @@ impl SpatialTree {
     /// The positions are specified by vectors of lats, lons, and elevs, where
     /// the elements from each vector at a given index together specify a
     /// single point in space
-    pub fn from_latlons(lats: Vec<f32>, lons: Vec<f32>, elevs: Vec<f32>) -> Self {
+    pub fn from_latlons(lats: Vec<f64>, lons: Vec<f64>, elevs: Vec<f64>) -> Self {
         //TODO: ensure vecs are the same size
 
         let raw_points: Vec<SpatialPoint> = lats
@@ -50,9 +50,9 @@ impl SpatialTree {
 
     pub(crate) fn get_neighbours(
         &self,
-        lat: f32,
-        lon: f32,
-        radius: f32,
+        lat: f64,
+        lon: f64,
+        radius: f64,
         include_match: bool,
     ) -> Vec<&SpatialPoint> {
         let (x, y, z) = util::convert_coordinates(lat, lon);
@@ -69,11 +69,11 @@ impl SpatialTree {
 
     pub(crate) fn get_neighbours_with_distance(
         &self,
-        lat: f32,
-        lon: f32,
-        radius: f32,
+        lat: f64,
+        lon: f64,
+        radius: f64,
         include_match: bool,
-    ) -> (Vec<&SpatialPoint>, Vec<f32>) {
+    ) -> (Vec<&SpatialPoint>, Vec<f64>) {
         let points = self.get_neighbours(lat, lon, radius, include_match);
         let vec_length = points.len();
 
@@ -90,7 +90,7 @@ impl SpatialTree {
         (points, distances)
     }
 
-    pub(crate) fn get_coords_at_index(&self, i: usize) -> (f32, f32, f32) {
+    pub(crate) fn get_coords_at_index(&self, i: usize) -> (f64, f64, f64) {
         (self.lats[i], self.lons[i], self.elevs[i])
     }
 }

@@ -12,7 +12,7 @@ use crate::{util::Timeseries, DataCache, Error, Flag};
 /// - [`Flag::Invalid`] if `data` is empty,
 /// - [`Flag::Fail`] if all observations passed in are identical,
 /// - [`Flag::Pass`] otherwise.
-pub fn flatline_check(data: &[Option<f32>], threshold: f32) -> Flag {
+pub fn flatline_check(data: &[Option<f64>], threshold: f64) -> Flag {
     if data.contains(&None) {
         return Flag::DataMissing;
     }
@@ -45,7 +45,7 @@ pub fn flatline_check(data: &[Option<f32>], threshold: f32) -> Flag {
 pub fn flatline_check_cache(
     cache: &DataCache,
     num_points: u8,
-    threshold: f32,
+    threshold: f64,
 ) -> Result<Vec<Timeseries<Flag>>, Error> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(cache.data.len());

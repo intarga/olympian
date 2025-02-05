@@ -21,7 +21,7 @@ pub const SPIKE_TRAILING_PER_RUN: u8 = 1;
 /// - [`Flag::Fail`] if the difference (explained above) is less than 35% of the sum AND the sum
 ///   (explained above) is greater than `max`,
 /// - [`Flag::Pass`] otherwise.
-pub fn spike_check(data: &[Option<f32>; 3], max: f32) -> Flag {
+pub fn spike_check(data: &[Option<f64>; 3], max: f64) -> Flag {
     if data.contains(&None) {
         return Flag::DataMissing;
     }
@@ -49,7 +49,7 @@ pub fn spike_check(data: &[Option<f32>; 3], max: f32) -> Flag {
 /// - data is invalid
 /// - data has `num_leading_points` <= 1
 /// - data has `num_trailing_points` <= 1
-pub fn spike_check_cache(cache: &DataCache, max: f32) -> Result<Vec<Timeseries<Flag>>, Error> {
+pub fn spike_check_cache(cache: &DataCache, max: f64) -> Result<Vec<Timeseries<Flag>>, Error> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);
     let series_len = match cache.data.first() {

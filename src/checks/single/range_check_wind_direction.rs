@@ -8,7 +8,7 @@ use crate::{util::Timeseries, DataCache, Flag};
 /// - ([`Flag::Warn`], Some(value + 360)) if the value is between -20 and 0,
 /// - ([`Flag::Warn`], Some(value - 360)) if the value is between 360 and 380,
 /// - ([`Flag::Pass`], None) otherwise.
-pub fn range_check_wind_direction(datum: Option<f32>) -> (Flag, Option<f32>) {
+pub fn range_check_wind_direction(datum: Option<f64>) -> (Flag, Option<f64>) {
     // TODO: get to the bottom of weird -3.0 handling: kvalobs code looks for a value -3.0, and
     // avoids flagging that if X_5 (lowest?) is also -3.0. From comments in the code, it looks like
     // this has to do with a special param_id?
@@ -36,7 +36,7 @@ pub fn range_check_wind_direction(datum: Option<f32>) -> (Flag, Option<f32>) {
 //TODO: is this the optimal return signature for corrections?
 /// Apply [`range_check_wind_direction`] to a whole [`DataCache`]
 #[allow(clippy::type_complexity)]
-pub fn range_check_wind_direction_cache(cache: &DataCache) -> Vec<Timeseries<(Flag, Option<f32>)>> {
+pub fn range_check_wind_direction_cache(cache: &DataCache) -> Vec<Timeseries<(Flag, Option<f64>)>> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);
     let series_len = match cache.data.first() {

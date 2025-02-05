@@ -8,19 +8,19 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct BuddyCheckArgs {
     /// Search radius in which buddies of an observation will be found. Unit: m
-    pub radii: SingleOrVec<f32>,
+    pub radii: SingleOrVec<f64>,
     /// The minimum buddies an observation can have (lest it be flagged [`Flag::Isolated`])
     pub min_buddies: SingleOrVec<u32>,
     /// The variance threshold for flagging a station. Unit: σ (standard deviations)
-    pub threshold: f32,
+    pub threshold: f64,
     /// The maximum difference in elevation for a buddy (if negative will not check for height
     /// difference). Unit: m
-    pub max_elev_diff: f32,
+    pub max_elev_diff: f64,
     /// Linear elevation gradient with height. Unit: ou/m (ou = unit of observation)
-    pub elev_gradient: f32,
+    pub elev_gradient: f64,
     /// If the standard deviation of values in a neighborhood are less than min_std, min_std will
     /// be used instead
-    pub min_std: f32,
+    pub min_std: f64,
     /// The number of iterations of buddy_check to perform before returning
     pub num_iterations: u32,
 }
@@ -54,7 +54,7 @@ pub struct BuddyCheckArgs {
 /// element is set to true, while all values are always used as buddies for checking the data
 /// quality.
 pub fn buddy_check(
-    data: &[Option<f32>],
+    data: &[Option<f64>],
     rtree: &SpatialTree,
     args: &BuddyCheckArgs,
     obs_to_check: Option<&[bool]>,
@@ -87,7 +87,7 @@ pub fn buddy_check(
                 let (lat, lon, elev) = rtree.get_coords_at_index(i);
                 let neighbours = rtree.get_neighbours(lat, lon, *args.radii.index(i), false);
 
-                let mut list_buddies: Vec<f32> = Vec::new();
+                let mut list_buddies: Vec<f64> = Vec::new();
 
                 if neighbours.len() >= *args.min_buddies.index(i) as usize {
                     for neighbour in neighbours {
@@ -116,17 +116,17 @@ pub fn buddy_check(
                 }
 
                 if list_buddies.len() >= *args.min_buddies.index(i) as usize {
-                    let mean: f32 = list_buddies.iter().sum::<f32>() / list_buddies.len() as f32;
-                    let variance: f32 = (list_buddies.iter().map(|x| x.powi(2)).sum::<f32>()
-                        / list_buddies.len() as f32)
+                    let mean: f64 = list_buddies.iter().sum::<f64>() / list_buddies.len() as f64;
+                    let variance: f64 = (list_buddies.iter().map(|x| x.powi(2)).sum::<f64>()
+                        / list_buddies.len() as f64)
                         - mean.powi(2); // TODO: use a better variance algorithm?
                                         // let std = variance.sqrt();
-                                        // let std_adjusted = (variance + variance / list_buddies.len() as f32).sqrt();
+                                        // let std_adjusted = (variance + variance / list_buddies.len() as f64).sqrt();
                                         // if std_adjusted < min_std {
                                         //     std_adjusted = min_std
                                         // }
                     let std_adjusted = std::cmp::max_by(
-                        (variance + variance / list_buddies.len() as f32).sqrt(),
+                        (variance + variance / list_buddies.len() as f64).sqrt(),
                         args.min_std,
                         |x, y| x.partial_cmp(y).unwrap_or(std::cmp::Ordering::Equal),
                     );
@@ -174,7 +174,7 @@ pub fn buddy_check_cache(
 
     for i in (cache.num_leading_points as usize)..(series_len - cache.num_trailing_points as usize)
     {
-        let timeslice: Vec<Option<f32>> = cache.data.iter().map(|fs| fs.values[i]).collect();
+        let timeslice: Vec<Option<f64>> = cache.data.iter().map(|fs| fs.values[i]).collect();
         let spatial_result = buddy_check(&timeslice, &cache.rtree, args, obs_to_check)?;
 
         for i in 0..spatial_result.len() {

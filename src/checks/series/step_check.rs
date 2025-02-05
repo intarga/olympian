@@ -13,7 +13,7 @@ pub const STEP_LEADING_PER_RUN: u8 = 1;
 /// - [`Flag::Fail`] If the absolute value of the difference between the observed value and it's
 ///   predecessor is greater than max
 /// - [`Flag::Pass`] otherwise.
-pub fn step_check(data: &[Option<f32>; 2], max: f32) -> Flag {
+pub fn step_check(data: &[Option<f64>; 2], max: f64) -> Flag {
     if data.contains(&None) {
         return Flag::DataMissing;
     }
@@ -33,7 +33,7 @@ pub fn step_check(data: &[Option<f32>; 2], max: f32) -> Flag {
 ///
 /// - data is invalid
 /// - data has `num_leading_points` < 1
-pub fn step_check_cache(cache: &DataCache, max: f32) -> Result<Vec<Timeseries<Flag>>, Error> {
+pub fn step_check_cache(cache: &DataCache, max: f64) -> Result<Vec<Timeseries<Flag>>, Error> {
     let num_series = cache.data.len();
     let mut result_vec = Vec::with_capacity(num_series);
     let series_len = match cache.data.first() {
