@@ -83,7 +83,7 @@ pub fn buddy_check(
                 continue;
             }
 
-            if obs_to_check.map_or(true, |inner| inner[i]) {
+            if obs_to_check.is_none_or(|inner| inner[i]) {
                 let (lat, lon, elev) = rtree.get_coords_at_index(i);
                 let neighbours = rtree.get_neighbours(lat, lon, *args.radii.index(i), false);
 
