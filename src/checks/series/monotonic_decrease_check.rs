@@ -134,12 +134,11 @@ pub fn monotonic_decrease_check_cache(
 mod tests {
     use super::*;
     use chronoutil::RelativeDuration;
-    use std::iter::repeat;
+    use std::iter::repeat_n;
 
     #[test]
     fn test_monotonic_decrease_check() {
-        let decreasing_sequence: Vec<Option<f64>> = repeat(200.)
-            .take(25)
+        let decreasing_sequence: Vec<Option<f64>> = repeat_n(200., 25)
             .enumerate()
             .map(|(i, val)| Some(val - (i as f64 * 0.1)))
             .collect();
