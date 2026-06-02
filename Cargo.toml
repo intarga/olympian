@@ -11,7 +11,7 @@ categories = ["science::geo"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rstar = "0.12.2"
-faer = "0.22"
-thiserror = "2.0.12"
+rstar = "0.13.0"
+faer = "0.24"
+thiserror = "2.0.18"
 chronoutil = "0.2.7"
